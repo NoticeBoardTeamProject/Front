@@ -1,0 +1,21 @@
+.custom-nav-link {
+    padding: 0px 22px;
+    font-size: 120%;
+    color: rgb(137, 143, 150);
+    transition: all 0.2s ease;
+    display: inline-block;
+    text-decoration: none;
+}
+
+.custom-nav-link:hover {
+    transform: translateY(-2px);
+    color: rgb(186, 191, 196);
+}
+
+.custom-nav-link.selected {
+    color: white !important;
+}
+
+.custom-nav-link.selected:hover {
+    color: white !important;
+}
