@@ -32,9 +32,14 @@ const AuthPage: React.FC = () => {
 
         try {
             if (isLogin) {
-                const response = await axios.post(`${API_URL}/login`, {
-                    email,
-                    password
+                const formData = new URLSearchParams();
+                formData.append("username", email);
+                formData.append("password", password);
+
+                const response = await axios.post(`${API_URL}/login`, formData, {
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
                 });
 
                 localStorage.setItem("token", response.data.access_token);

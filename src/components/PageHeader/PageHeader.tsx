@@ -7,7 +7,8 @@ import { Navbar, Nav } from "react-bootstrap";
 import { FontAwesomeIcon, FontAwesomeIconProps } from "@fortawesome/react-fontawesome";
 import {
   faUser,
-  faRightToBracket
+  faRightToBracket,
+  faBullhorn
 } from "@fortawesome/free-solid-svg-icons";
 
 interface CustomNavLinkProps {
@@ -64,8 +65,8 @@ const PageHeader: FC = () => {
     >
       <Nav className="me-auto" style={{ display: "flex", flexDirection: "row" }}>
         {!isLoggedIn && <CustomNavLink link={"/login"} icon={faRightToBracket} text={"Login"} />}
+        {isLoggedIn && <CustomNavLink link={"/create-notice"} icon={faBullhorn} text={"Create notice"} />}
       </Nav>
-
       <Nav style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
         {isLoggedIn && <CustomNavLink link={"/profile"} icon={faUser} text={"Profile"} />}
       </Nav>

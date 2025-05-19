@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import PageHeader from "./components/PageHeader/PageHeader";
 import Auth from "./pages/Auth/Auth"
 import Profile from "./pages/Profile/Profile"
+import CreateNotice from "./pages/CreateNotice/CreateNotice"
 import PageWrapper from "./components/PageWrapper/PageWrapper";
 import EaseOutWrapper from "./components/EaseOutWrapper/EaseOutWrapper";
 
@@ -23,6 +24,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Auth />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/create-notice" element={<CreateNotice />} />
         </Routes>
       </Router>
     </PageWrapper>
