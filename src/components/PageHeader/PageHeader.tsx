@@ -8,16 +8,19 @@ import { FontAwesomeIcon, FontAwesomeIconProps } from "@fortawesome/react-fontaw
 import {
   faUser,
   faRightToBracket,
-  faBullhorn
+  faBullhorn,
+  faCirclePlus,
+  faStore
 } from "@fortawesome/free-solid-svg-icons";
 
 interface CustomNavLinkProps {
   icon: FontAwesomeIconProps["icon"];
+  secondIcon?: FontAwesomeIconProps["icon"];
   text: string;
   link: string;
 }
 
-const CustomNavLink: React.FC<CustomNavLinkProps> = ({ icon, text, link }) => {
+const CustomNavLink: React.FC<CustomNavLinkProps> = ({ icon, text, link, secondIcon }) => {
   const location = useLocation();
 
   return (
@@ -28,7 +31,29 @@ const CustomNavLink: React.FC<CustomNavLinkProps> = ({ icon, text, link }) => {
         className={`custom-nav-link ${location.pathname === link ? "selected" : ""}`}
         style={{ padding: "0px 22px" }}
       >
-        <FontAwesomeIcon icon={icon} /> {text}
+
+        <FontAwesomeIcon
+          style={{
+            position: "relative",
+            top: secondIcon ? "-2px" : 0
+          }}
+          icon={icon}
+        /> {secondIcon && (
+          <div style={{ position: "absolute" }}>
+            <FontAwesomeIcon
+              style={{
+                position: "relative",
+                fontSize: "70%",
+                border: "rgb(23, 25, 27) 1.8px solid",
+                borderRadius: "100%",
+                top: "-17px",
+                left: "-7px",
+                backgroundColor: "rgb(23, 25, 27)"
+              }}
+              icon={secondIcon}
+            />
+          </div>
+        )} {text}
       </Nav.Link>
     </Nav>
   );
@@ -64,8 +89,9 @@ const PageHeader: FC = () => {
       }}
     >
       <Nav className="me-auto" style={{ display: "flex", flexDirection: "row" }}>
+        <CustomNavLink link={"/"} icon={faStore} text={"Notices"} />
         {!isLoggedIn && <CustomNavLink link={"/login"} icon={faRightToBracket} text={"Login"} />}
-        {isLoggedIn && <CustomNavLink link={"/create-notice"} icon={faBullhorn} text={"Create notice"} />}
+        {isLoggedIn && <CustomNavLink link={"/create-notice"} secondIcon={faCirclePlus} icon={faBullhorn} text={"Create notice"} />}
       </Nav>
       <Nav style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
         {isLoggedIn && <CustomNavLink link={"/profile"} icon={faUser} text={"Profile"} />}

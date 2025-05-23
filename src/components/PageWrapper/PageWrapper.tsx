@@ -9,7 +9,6 @@ const PageWrapper: React.FC<PageWrapperProps> = ({
    return (
       <div style={{
         width: "100%",
-        height: "100vh",
         display: "flex",
         justifyContent: "center",
         backgroundColor: "rgb(23, 25, 27)"

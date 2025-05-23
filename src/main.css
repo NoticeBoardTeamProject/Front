@@ -5,3 +5,73 @@ p {
 * {
     font-family: monospace
 }
+
+body {
+    background-color: rgb(23, 25, 27);
+}
+
+.form-control {
+    background-color: rgb(33, 37, 41);
+    color: white;
+    height: 29.25px;
+}
+
+.form-control:focus {
+    outline: none;
+    box-shadow: rgb(25, 135, 84) 0px 0px 0px 1px;
+    background-color: rgb(33, 37, 41);
+    color: white;
+}
+
+.carousel-indicators>button {
+    background-color: rgb(63, 68, 74) !important;
+    border: 8px rgb(23, 25, 27) solid !important;
+    margin: 0 !important;
+    width: 38px !important;
+    height: 4px !important;
+    opacity: 1 !important;
+}
+
+.carousel-indicators .active {
+    background-color: rgb(25, 135, 84) !important;
+    opacity: 1;
+}
+
+.carousel-indicators>button:first-child:last-child {
+    border-radius: 8px;
+}
+
+.carousel-indicators>button:first-child:not(:last-child) {
+    border-radius: 8px 0 0 8px;
+}
+
+.carousel-indicators>button:last-child:not(:first-child) {
+    border-radius: 0 8px 8px 0;
+}
+
+.carousel-control-next-icon {
+    filter: brightness(0) saturate(100%) invert(47%) sepia(78%) saturate(321%) hue-rotate(86deg) brightness(90%) contrast(87%);
+}
+
+.input-group-text {
+    background-color: rgb(33, 37, 41);
+    border-top: none;
+    border-right: none;
+    border-bottom: none;
+    color: rgb(137, 143, 150);
+}
+
+.my-masonry-grid {
+    display: flex;
+    margin-left: -16px;
+    width: auto;
+}
+
+.my-masonry-grid_column {
+    padding-left: 16px;
+    background-clip: padding-box;
+}
+
+.my-masonry-grid_column>div {
+    margin-bottom: 16px;
+}

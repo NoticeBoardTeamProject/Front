@@ -1,11 +1,14 @@
-import React, { useState } from "react";
-import { Form, Button, Spinner, Carousel, Row, Col, Image } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Form, Button, Spinner, Carousel, InputGroup } from "react-bootstrap";
+import Select from "react-select";
 import { useNavigate } from "react-router-dom";
 import "./CreateNotice.css";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-    faTrash
+    faTrash,
+    faChevronLeft,
+    faChevronRight
 } from "@fortawesome/free-solid-svg-icons";
 
 import axios from "axios";
@@ -20,14 +23,30 @@ const CreateNotice: React.FC = () => {
     const [price, setPrice] = useState("");
     const [tags, setTags] = useState("");
     const [categoryId, setCategoryId] = useState("0");
+    const [categories, setCategories] = useState<{ value: number; label: string }[]>([]);
     const [images, setImages] = useState<File[]>([]);
     const [loading, setLoading] = useState(false);
-
     const [activeIndex, setActiveIndex] = useState(0);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await axios.get(`${API_URL}/categories`);
+                const options = response.data.map((cat: any) => ({
+                    value: cat.id,
+                    label: cat.name,
+                }));
+                setCategories(options);
+            } catch (error) {
+                console.error("Error fetching categories:", error);
+            }
+        };
+
+        fetchCategories();
+    }, []);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files) return;
-
         const selected = Array.from(e.target.files);
         const combined = [...images, ...selected].slice(0, 6);
         setImages(combined);
@@ -35,6 +54,9 @@ const CreateNotice: React.FC = () => {
 
     const removeImage = (indexToRemove: number) => {
         const updated = images.filter((_, i) => i !== indexToRemove);
+        if (activeIndex - 1 != -1) {
+            setActiveIndex(activeIndex - 1);
+        }
         setImages(updated);
     };
 
@@ -72,40 +94,139 @@ const CreateNotice: React.FC = () => {
     return (
         <PageWrapper>
             <div style={{ gap: "40px", justifyContent: "center", display: "flex" }}>
-                <div style={{width: "240px"}}>
+                <div style={{ width: "240px" }}>
                     <Form onSubmit={handleSubmit}>
                         <Form.Group className="mb-3">
                             <Form.Label>Title</Form.Label>
                             <Form.Control value={title} onChange={(e) => setTitle(e.target.value)} required />
                         </Form.Group>
+
                         <Form.Group className="mb-3">
                             <Form.Label>Caption</Form.Label>
                             <Form.Control as="textarea" rows={3} value={caption} onChange={(e) => setCaption(e.target.value)} required />
                         </Form.Group>
+
                         <Form.Group className="mb-3">
                             <Form.Label>Price</Form.Label>
-                            <Form.Control type="number" value={price} onChange={(e) => setPrice(e.target.value)} required />
+                            <InputGroup>
+                                <Form.Control
+                                    type="number"
+                                    min={0}
+                                    value={price}
+                                    onChange={(e) => setPrice(e.target.value)}
+                                    required
+                                />
+                                <InputGroup.Text style={{
+                                    boxShadow: "inset 1.7px 0 0 rgb(63, 68, 74)",
+                                    width: "36px",
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    userSelect: "none"
+                                }}>₴</InputGroup.Text>
+                            </InputGroup>
                         </Form.Group>
+
                         <Form.Group className="mb-3">
                             <Form.Label>Tags (comma-separated)</Form.Label>
                             <Form.Control value={tags} onChange={(e) => setTags(e.target.value)} />
                         </Form.Group>
 
-                        <Button className='w-100' type="submit" variant="success" disabled={loading}>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Category</Form.Label>
+                            <Select
+                                options={categories}
+                                onChange={(selectedOption) => setCategoryId(String(selectedOption?.value))}
+                                styles={{
+                                    control: (base) => ({
+                                        ...base,
+                                        backgroundColor: "rgb(33, 37, 41)",
+                                        border: "none",
+                                        color: "white",
+                                        minHeight: "29.25px",
+                                        height: "29.25px",
+                                    }),
+                                    valueContainer: (base) => ({
+                                        ...base,
+                                        height: "29.25px",
+                                        padding: "0 8px",
+                                    }),
+                                    indicatorSeparator: () => ({
+                                        display: "none",
+                                    }),
+                                    indicatorsContainer: (base) => ({
+                                        ...base,
+                                        height: "29.25px",
+                                        boxShadow: "inset 1px 0 0 rgb(63, 68, 74)"
+                                    }),
+                                    dropdownIndicator: (base) => ({
+                                        ...base,
+                                        color: "rgb(137, 143, 150)"
+                                    }),
+                                    input: (base) => ({
+                                        ...base,
+                                        margin: 0,
+                                        padding: 0,
+                                    }),
+                                    menu: (base) => ({
+                                        ...base,
+                                        backgroundColor: "rgb(33, 37, 41)",
+                                        zIndex: 10,
+                                    }),
+                                    option: (base, state) => ({
+                                        ...base,
+                                        backgroundColor: state.isFocused
+                                            ? "rgb(25, 135, 84)"
+                                            : "rgb(33, 37, 41)",
+                                        color: "white",
+                                        cursor: "pointer",
+                                        height: "29.25px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                    }),
+                                    singleValue: (base) => ({
+                                        ...base,
+                                        color: "white",
+                                    }),
+                                }}
+                                theme={(theme) => ({
+                                    ...theme,
+                                    borderRadius: 4,
+                                    colors: {
+                                        ...theme.colors,
+                                        primary25: "rgb(25, 135, 84)",
+                                        primary: "rgb(25, 135, 84)",
+                                    },
+                                })}
+                            />
+                        </Form.Group>
+                        <Button className="w-100" type="submit" variant="success" disabled={loading}>
                             {loading ? <Spinner animation="border" size="sm" /> : "Create Notice"}
                         </Button>
                     </Form>
                 </div>
 
-                <div style={{width: "340px"}}>
+                <div style={{ width: "340px" }}>
                     <Form.Group className="mb-3">
-                        <Form.Label>Upload Images (up to {6})</Form.Label>
+                        <Form.Label>Upload Images (up to 6)</Form.Label>
                         <Form.Control type="file" multiple accept="image/*" onChange={handleImageChange} />
                     </Form.Group>
 
                     {images.length > 0 && (
                         <div style={{ position: "relative" }}>
-                            <Carousel>
+                            <Carousel
+                                activeIndex={activeIndex}
+                                onSelect={(selectedIndex) => setActiveIndex(selectedIndex)}
+                                prevIcon={
+                                    <span style={{ color: "rgb(23, 25, 27)", fontSize: "2rem" }}>
+                                        <FontAwesomeIcon icon={faChevronLeft} />
+                                    </span>
+                                }
+                                nextIcon={
+                                    <span style={{ color: "rgb(23, 25, 27)", fontSize: "2rem" }}>
+                                        <FontAwesomeIcon icon={faChevronRight} />
+                                    </span>
+                                }
+                            >
                                 {images.map((file, index) => (
                                     <Carousel.Item key={index}>
                                         <div
@@ -133,25 +254,25 @@ const CreateNotice: React.FC = () => {
                                 ))}
                             </Carousel>
 
-                            {images.length > 0 && (
-                                <Button
-                                    variant="danger"
-                                    size="sm"
-                                    style={{
-                                        position: "absolute",
-                                        top: 10,
-                                        right: 10,
-                                        zIndex: 10,
-                                        borderRadius: "4px",
-                                        fontSize: "110%",
-                                        width: "30px",
-                                        height: "30px"
-                                    }}
-                                    onClick={() => removeImage(activeIndex)}
-                                >
-                                    <FontAwesomeIcon icon={faTrash} />
-                                </Button>
-                            )}
+
+                            <Button
+                                variant="dark"
+                                size="sm"
+                                style={{
+                                    position: "absolute",
+                                    top: 10,
+                                    right: 10,
+                                    zIndex: 10,
+                                    borderRadius: "4px",
+                                    fontSize: "110%",
+                                    width: "30px",
+                                    height: "30px",
+                                }}
+                                onClick={() => removeImage(activeIndex)}
+                                title="Delete current image"
+                            >
+                                <FontAwesomeIcon icon={faTrash} />
+                            </Button>
                         </div>
                     )}
                 </div>
