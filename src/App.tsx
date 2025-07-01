@@ -8,6 +8,11 @@ import Main from "./pages/Main/Main"
 import CreateNotice from "./pages/CreateNotice/CreateNotice"
 import PageWrapper from "./components/PageWrapper/PageWrapper";
 import EaseOutWrapper from "./components/EaseOutWrapper/EaseOutWrapper";
+import PostDetails from "./pages/PostDetails/PostDetails";
+import Chat from "./pages/Chat/Chat";
+import MyChats from "./pages/MyChats/MyChats";
+import Verify from "./pages/Verify/Verify";
+import AdminPanel from "./pages/AdminPanel/AdminPanel";
 
 function App() {
   return (
@@ -26,6 +31,11 @@ function App() {
           <Route path="/login" element={<Auth />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/create-notice" element={<CreateNotice />} />
+          <Route path="/post/:postId" element={<PostDetails />} />
+          <Route path="/chat/:userId" element={<Chat />} />
+          <Route path="/my-chats" element={<MyChats />} />
+          <Route path="/admin-panel" element={<AdminPanel />} />
+          <Route path="/verify" element={<Verify />} />
           <Route path="/" element={<Main />} />
         </Routes>
       </Router>

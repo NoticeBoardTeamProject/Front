@@ -10,7 +10,11 @@ import {
   faRightToBracket,
   faBullhorn,
   faCirclePlus,
-  faStore
+  faStore,
+  faMessage,
+  faGear,
+  faShieldHalved,
+  faCertificate
 } from "@fortawesome/free-solid-svg-icons";
 
 interface CustomNavLinkProps {
@@ -31,7 +35,6 @@ const CustomNavLink: React.FC<CustomNavLinkProps> = ({ icon, text, link, secondI
         className={`custom-nav-link ${location.pathname === link ? "selected" : ""}`}
         style={{ padding: "0px 22px" }}
       >
-
         <FontAwesomeIcon
           style={{
             position: "relative",
@@ -59,24 +62,52 @@ const CustomNavLink: React.FC<CustomNavLinkProps> = ({ icon, text, link, secondI
   );
 };
 
+function parseJwt(token: string) {
+  try {
+    const base64Payload = token.split('.')[1];
+    const payload = atob(base64Payload.replace(/-/g, '+').replace(/_/g, '/'));
+    return JSON.parse(decodeURIComponent(escape(payload)));
+  } catch {
+    return null;
+  }
+}
+
 const PageHeader: FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => !!localStorage.getItem("token"));
+  const [role, setRole] = useState<string | null>(null);
+  const [isVerified, setIsVerified] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const handleLogin = () => {
-      setIsLoggedIn(!!localStorage.getItem("token"));
-    };
-    const handleLogout = () => {
-      setIsLoggedIn(false);
-    };
+    function updateUserState() {
+      const token = localStorage.getItem("token");
+      if (token) {
+        const payload = parseJwt(token);
+        setIsLoggedIn(true);
+        setRole(payload?.role ?? null);
+        setIsVerified(payload?.isVerified ?? null);
+      } else {
+        setIsLoggedIn(false);
+        setRole(null);
+        setIsVerified(null);
+      }
+    }
 
-    window.addEventListener("loggedIn", handleLogin);
-    window.addEventListener("loggedOut", handleLogout);
+    updateUserState();
+
+    window.addEventListener("loggedIn", updateUserState);
+    window.addEventListener("loggedOut", () => {
+      setIsLoggedIn(false);
+      setRole(null);
+      setIsVerified(null);
+    });
 
     return () => {
-      window.removeEventListener("loggedIn", handleLogin);
-      window.addEventListener("loggedOut", handleLogout);
-
+      window.removeEventListener("loggedIn", updateUserState);
+      window.removeEventListener("loggedOut", () => {
+        setIsLoggedIn(false);
+        setRole(null);
+        setIsVerified(null);
+      });
     };
   }, []);
 
@@ -90,8 +121,26 @@ const PageHeader: FC = () => {
     >
       <Nav className="me-auto" style={{ display: "flex", flexDirection: "row" }}>
         <CustomNavLink link={"/"} icon={faStore} text={"Notices"} />
+
         {!isLoggedIn && <CustomNavLink link={"/login"} icon={faRightToBracket} text={"Login"} />}
-        {isLoggedIn && <CustomNavLink link={"/create-notice"} secondIcon={faCirclePlus} icon={faBullhorn} text={"Create notice"} />}
+
+        {isLoggedIn && (
+          <>
+            {!isVerified && <CustomNavLink link={"/verify"} icon={faCertificate} text={"Verify"} />}
+
+            {!isVerified && <CustomNavLink link={"/create-notice"} secondIcon={faCirclePlus} icon={faBullhorn} text={"Create notice"} />}
+
+            <CustomNavLink link={"/my-chats"} icon={faMessage} text={"My chats"} />
+
+            {(role?.toLowerCase() === "admin" || role?.toLowerCase() === "owner") && (
+              <CustomNavLink link={"/admin-panel"} icon={faGear} text={"Admin panel"} />
+            )}
+
+            {role?.toLowerCase() === "owner" && (
+              <CustomNavLink link={"/owner-panel"} icon={faShieldHalved} text={"Owner panel"} />
+            )}
+          </>
+        )}
       </Nav>
       <Nav style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
         {isLoggedIn && <CustomNavLink link={"/profile"} icon={faUser} text={"Profile"} />}
