@@ -128,7 +128,7 @@ const PageHeader: FC = () => {
           <>
             {!isVerified && <CustomNavLink link={"/verify"} icon={faCertificate} text={"Verify"} />}
 
-            {!isVerified && <CustomNavLink link={"/create-notice"} secondIcon={faCirclePlus} icon={faBullhorn} text={"Create notice"} />}
+            {isVerified && <CustomNavLink link={"/create-notice"} secondIcon={faCirclePlus} icon={faBullhorn} text={"Create notice"} />}
 
             <CustomNavLink link={"/my-chats"} icon={faMessage} text={"My chats"} />
 

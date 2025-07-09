@@ -61,8 +61,6 @@ const Chat: React.FC = () => {
                 }
             );
             setDialogue(res.data);
-
-            console.log(res.data);
         } catch (err) {
             setError("Failed to load chat.");
         } finally {
@@ -143,7 +141,7 @@ const Chat: React.FC = () => {
                                             ? "rgb(23, 25, 27)"
                                             : "rgb(25, 135, 84)",
                                     borderRadius: "12px",
-                                    maxWidth: "80%",
+                                    maxWidth: "70%",
                                     color: "white",
                                 }}
                             >

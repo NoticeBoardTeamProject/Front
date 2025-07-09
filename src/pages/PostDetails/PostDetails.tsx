@@ -4,7 +4,7 @@ import axios from "axios";
 import { Spinner, Card, Alert, Button, Modal, Form } from "react-bootstrap";
 import { Carousel } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft, faChevronRight, faEye, faMessage, faPhone, faEnvelope, faUser, faFlag, faShare } from "@fortawesome/free-solid-svg-icons";
+import { faChevronLeft, faChevronRight, faEye, faMessage, faPhone, faEnvelope, faUser, faFlag, faShare, faHammer, faEraser } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import PageWrapper from "../../components/PageWrapper/PageWrapper";
 
@@ -33,6 +33,16 @@ interface Post {
     user: User;
 }
 
+function parseJwt(token: string) {
+    try {
+        const base64Payload = token.split('.')[1];
+        const payload = atob(base64Payload.replace(/-/g, '+').replace(/_/g, '/'));
+        return JSON.parse(decodeURIComponent(escape(payload)));
+    } catch {
+        return null;
+    }
+}
+
 const PostDetails: React.FC = () => {
     const navigate = useNavigate();
     const { postId } = useParams<{ postId: string }>();
@@ -47,6 +57,15 @@ const PostDetails: React.FC = () => {
     const [sendingReport, setSendingReport] = useState(false);
     const [reportError, setReportError] = useState<string | null>(null);
     const [reportSuccess, setReportSuccess] = useState<string | null>(null);
+
+    const [showBlockModal, setShowBlockModal] = useState(false);
+    const [blockReason, setBlockReason] = useState("");
+    const [blockingUser, setBlockingUser] = useState(false);
+    const [blockError, setBlockError] = useState<string | null>(null);
+    const [blockSuccess, setBlockSuccess] = useState<string | null>(null);
+
+    const [role, setRole] = useState<string | null>(null);
+    const [userEmail, setUserEmail] = useState<string | null>(null);
 
     const API_URL = import.meta.env.VITE_API_URL;
 
@@ -110,6 +129,36 @@ const PostDetails: React.FC = () => {
         setShowReportModal(false);
     };
 
+    useEffect(() => {
+        function updateUserState() {
+            const token = localStorage.getItem("token");
+            if (token) {
+                const payload = parseJwt(token);
+                setRole(payload?.role ?? null);
+                setUserEmail(payload?.sub ?? null);
+            } else {
+                setRole(null);
+                setUserEmail(null);
+            }
+        }
+
+        updateUserState();
+
+        window.addEventListener("loggedIn", updateUserState);
+        window.addEventListener("loggedOut", () => {
+            setRole(null);
+            setUserEmail(null);
+        });
+
+        return () => {
+            window.removeEventListener("loggedIn", updateUserState);
+            window.removeEventListener("loggedOut", () => {
+                setRole(null);
+                setUserEmail(null);
+            });
+        };
+    }, []);
+
     const sendReport = async () => {
         if (!reportText.trim()) {
             setReportError("Please describe the nature of the complaint.");
@@ -155,6 +204,85 @@ const PostDetails: React.FC = () => {
     if (!post) return null;
 
     const images = getImageUrls(post.images);
+
+    const openBlockModal = () => {
+        setBlockReason("");
+        setBlockError(null);
+        setBlockSuccess(null);
+        setShowBlockModal(true);
+    };
+
+    const closeBlockModal = () => {
+        setShowBlockModal(false);
+    };
+
+    const sendBlockUser = async () => {
+        if (!blockReason.trim()) {
+            setBlockError("Please provide a reason for blocking.");
+            return;
+        }
+
+        setBlockingUser(true);
+        setBlockError(null);
+        setBlockSuccess(null);
+
+        const token = localStorage.getItem("token");
+        if (!token) {
+            setBlockError("You must be logged in.");
+            setBlockingUser(false);
+            return;
+        }
+
+        try {
+            await axios.put(
+                `${API_URL}/users/block/${post?.userId}`,
+                {
+                    isBlocked: true,
+                    blockReason: blockReason.trim(),
+                },
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            setBlockSuccess("User has been blocked.");
+            setBlockReason("");
+            setTimeout(() => {
+                setShowBlockModal(false);
+            }, 1500);
+        } catch (err: any) {
+            setBlockError(
+                axios.isAxiosError(err) && err.response?.data?.detail
+                    ? err.response.data.detail
+                    : "Failed to block user."
+            );
+        } finally {
+            setBlockingUser(false);
+        }
+    };
+
+    const handleDeletePost = async () => {
+        if (!post) return;
+        if (!window.confirm("Are you sure you want to delete this post?")) return;
+
+        try {
+            await axios.delete(`${API_URL}/posts/${post.id}`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+            alert("Post deleted successfully");
+            navigate("/");
+        } catch (error: any) {
+            if (axios.isAxiosError(error)) {
+                alert(error.response?.data?.detail || "Failed to delete post");
+            } else {
+                alert("Failed to delete post");
+            }
+        }
+    };
+
+    const isAuthor = userEmail === post.user.email;
+    const canDelete = isAuthor || role === "admin" || role === "owner";
 
     return (
         <PageWrapper>
@@ -269,9 +397,21 @@ const PostDetails: React.FC = () => {
                                         <div>
                                             <FontAwesomeIcon icon={faEye} /> {post.views}
                                         </div>
-                                        <Button variant="danger" onClick={() => openReportModal("post")}>
-                                            <FontAwesomeIcon icon={faFlag} />
-                                        </Button>
+                                        {role && (
+                                            <Button
+                                                variant="danger"
+                                                onClick={() => {
+                                                    if (canDelete) {
+                                                        handleDeletePost();
+                                                    } else {
+                                                        openReportModal("post");
+                                                    }
+                                                }}
+                                                title={canDelete ? "Delete Post" : "Report Post"}
+                                            >
+                                                <FontAwesomeIcon icon={canDelete ? faEraser : faFlag} />
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
                             </Card.Footer>
@@ -333,20 +473,33 @@ const PostDetails: React.FC = () => {
                                     <FontAwesomeIcon icon={faEnvelope} /> {post.user.email}
                                 </p>
                             </div>
-                            <div style={{ display: "flex", marginTop: "12px", gap: "10px" }}>
-                                <Button
-                                    variant="success"
-                                    style={{
-                                        flex: "1"
-                                    }}
-                                    onClick={() => navigate(`/chat/${post.userId}?postId=${post.id}`)}
-                                >
-                                    <FontAwesomeIcon icon={faMessage} /> Contact
-                                </Button>
-                                <Button variant="danger" onClick={() => openReportModal("user")}>
-                                    <FontAwesomeIcon icon={faFlag} />
-                                </Button>
-                            </div>
+                            {!isAuthor && role && (
+                                <div style={{ display: "flex", marginTop: "12px", gap: "10px" }}>
+                                    <Button
+                                        variant="success"
+                                        style={{
+                                            flex: "1"
+                                        }}
+                                        onClick={() => navigate(`/chat/${post.userId}?postId=${post.id}`)}
+                                    >
+                                        <FontAwesomeIcon icon={faMessage} /> Contact
+                                    </Button>
+                                    <Button
+                                        variant="danger"
+                                        onClick={() => {
+                                            if (role === "admin" || role === "owner") {
+                                                openBlockModal();
+                                            } else {
+                                                openReportModal("user");
+                                            }
+                                        }}
+                                    >
+                                        <FontAwesomeIcon
+                                            icon={role === "owner" || role === "admin" ? faHammer : faFlag}
+                                        />
+                                    </Button>
+                                </div>
+                            )}
                         </Card>
                     </div>
 
@@ -376,6 +529,47 @@ const PostDetails: React.FC = () => {
                                 disabled={sendingReport || !!reportSuccess}
                             >
                                 <FontAwesomeIcon icon={faShare} /> {sendingReport ? "Sending..." : "Send"}
+                            </Button>
+                        </Modal.Footer>
+                    </Modal>
+
+                    <Modal show={showBlockModal} onHide={closeBlockModal} centered>
+                        <Modal.Body
+                            style={{
+                                backgroundColor: "rgb(33, 37, 41)",
+                                color: "white",
+                                borderRadius: "5.5px 5.5px 0 0",
+                            }}
+                        >
+                            <Modal.Title>Block User</Modal.Title>
+                            {blockError && <Alert variant="danger">{blockError}</Alert>}
+                            {blockSuccess && <Alert variant="success">{blockSuccess}</Alert>}
+                            <Form.Group controlId="blockReason">
+                                <Form.Label>Reason for blocking</Form.Label>
+                                <Form.Control
+                                    as="textarea"
+                                    rows={4}
+                                    value={blockReason}
+                                    style={{ backgroundColor: "rgb(23, 25, 27)", height: "80px" }}
+                                    onChange={(e) => setBlockReason(e.target.value)}
+                                    disabled={blockingUser || !!blockSuccess}
+                                />
+                            </Form.Group>
+                        </Modal.Body>
+                        <Modal.Footer
+                            style={{
+                                backgroundColor: "rgb(33, 37, 41)",
+                                color: "white",
+                                borderTop: "1px solid rgb(23, 25, 27)",
+                            }}
+                        >
+                            <Button
+                                variant="danger"
+                                onClick={sendBlockUser}
+                                disabled={blockingUser || !!blockSuccess}
+                            >
+                                <FontAwesomeIcon icon={faHammer} />{" "}
+                                {blockingUser ? "Blocking..." : "Block"}
                             </Button>
                         </Modal.Footer>
                     </Modal>

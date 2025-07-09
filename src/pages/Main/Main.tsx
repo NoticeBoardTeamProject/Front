@@ -132,8 +132,6 @@ const Main: React.FC = () => {
             }));
 
             setPosts(postsWithSerializedImages);
-
-            console.log(postsWithSerializedImages);
         } catch (error: any) {
             if (axios.isAxiosError(error) && error.response?.status === 404) {
                 setPosts([]);

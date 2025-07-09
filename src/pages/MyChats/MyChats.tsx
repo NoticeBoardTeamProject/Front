@@ -41,7 +41,13 @@ const MyChats: React.FC = () => {
                     },
                 });
 
-                setDialogs(res.data);
+                const sortedDialogs = res.data.sort((a, b) => {
+                    const timeA = a.last_message_time ? new Date(a.last_message_time).getTime() : 0;
+                    const timeB = b.last_message_time ? new Date(b.last_message_time).getTime() : 0;
+                    return timeB - timeA;
+                });
+
+                setDialogs(sortedDialogs);
             } catch (e) {
                 setError("Failed to load chats.");
             } finally {
@@ -58,7 +64,7 @@ const MyChats: React.FC = () => {
     return (
         <PageWrapper>
             {dialogs.length === 0 ? (
-                <p>No chats found.</p>
+                <p style={{ color: "white" }}>No chats found.</p>
             ) : (
                 dialogs.map((dialog) => (
                     <Card

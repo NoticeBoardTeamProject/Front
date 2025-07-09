@@ -233,7 +233,6 @@ const CreateNotice: React.FC = () => {
                                             style={{
                                                 width: "100%",
                                                 height: "350px",
-                                                backgroundColor: "#000",
                                                 display: "flex",
                                                 justifyContent: "center",
                                                 alignItems: "center",

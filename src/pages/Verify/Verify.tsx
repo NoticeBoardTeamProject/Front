@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button, Alert, Spinner, Carousel } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash, faChevronLeft, faChevronRight, faCheck } from "@fortawesome/free-solid-svg-icons";
+import { faTrash, faChevronLeft, faChevronRight, faCheck, faImage } from "@fortawesome/free-solid-svg-icons";
 import PageWrapper from "../../components/PageWrapper/PageWrapper";
 
 const Verify: React.FC = () => {
@@ -83,7 +83,7 @@ const Verify: React.FC = () => {
 
     return (
         <PageWrapper>
-            <Form onSubmit={handleSubmit} style={{width: "340px"}}>
+            <Form onSubmit={handleSubmit} style={{ width: "340px" }}>
                 <Form.Label>Upload photos that confirm your identity.</Form.Label>
                 <Form.Group className="mb-3">
                     <Form.Control
@@ -163,14 +163,14 @@ const Verify: React.FC = () => {
 
                 <Button
                     type="submit"
-                    disabled={loading}
+                    disabled={loading || images.length == 0}
                     variant="success"
                     style={{
                         width: "100%",
                         marginTop: "1rem"
                     }}
                 >
-                    {loading ? "Submitting..." : <><FontAwesomeIcon icon={faCheck} /> Submit Request</>}
+                    {loading ? "Submitting..." : images.length==0 ? <><FontAwesomeIcon icon={faImage} /> Attach at least one photo!</> : <><FontAwesomeIcon icon={faCheck} /> Submit Request</>}
                 </Button>
             </Form>
         </PageWrapper>
