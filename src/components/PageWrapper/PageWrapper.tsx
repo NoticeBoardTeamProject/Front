@@ -11,7 +11,7 @@ const PageWrapper: React.FC<PageWrapperProps> = ({
         width: "100%",
         display: "flex",
         justifyContent: "center",
-        backgroundColor: "rgb(23, 25, 27)"
+        backgroundColor: "#0D0D0D"
       }}>
         <div style={{
             width: "1120px",

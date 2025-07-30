@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
 import axios from "axios";
-import { Form, Button, Card, Spinner, Alert } from "react-bootstrap";
-import PageWrapper from "../../components/PageWrapper/PageWrapper";
+import { Form, Button, Spinner, Alert } from "react-bootstrap";
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faShare } from "@fortawesome/free-solid-svg-icons";
+import SentMessageIcon from "../../assets/icons/SentMessageIcon.svg?react";
+
+interface ChatProps {
+    userId: number;
+    postId: number;
+}
 
 interface UserShort {
     id: number;
@@ -31,11 +33,7 @@ interface DialogueDetailResponse {
     messages: ChatMessage[];
 }
 
-const Chat: React.FC = () => {
-    const { userId } = useParams<{ userId: string }>();
-    const [searchParams] = useSearchParams();
-    const postId = searchParams.get("postId");
-
+const Chat: React.FC<ChatProps> = ({ userId, postId }) => {
     const [dialogue, setDialogue] = useState<DialogueDetailResponse | null>(null);
     const [newMessage, setNewMessage] = useState("");
     const [loading, setLoading] = useState(true);
@@ -45,12 +43,6 @@ const Chat: React.FC = () => {
     const token = localStorage.getItem("token");
 
     const fetchMessages = async () => {
-        if (!userId || !postId) {
-            setError("User ID или Post ID не указаны");
-            setLoading(false);
-            return;
-        }
-
         try {
             const res = await axios.get<DialogueDetailResponse>(
                 `${API_URL}/chat/with/${userId}?post_id=${postId}`,
@@ -69,14 +61,14 @@ const Chat: React.FC = () => {
     };
 
     const sendMessage = async () => {
-        if (!newMessage.trim() || !userId || !postId) return;
+        if (!newMessage.trim()) return;
 
         try {
             const res = await axios.post(
                 `${API_URL}/chat/send`,
                 {
-                    other_user_id: Number(userId),
-                    post_id: Number(postId),
+                    other_user_id: userId,
+                    post_id: postId,
                     message: newMessage,
                 },
                 {
@@ -114,39 +106,46 @@ const Chat: React.FC = () => {
     if (loading) return <Spinner animation="border" />;
     if (error) return <Alert variant="danger">{error}</Alert>;
     if (!dialogue)
-        return <p>Диалог не найден или данные отсутствуют.</p>;
+        return <p>Unexpected error.</p>;
 
     return (
-        <PageWrapper>
-            <Card style={{ background: "rgb(33, 37, 41)", width: "400px" }}>
-                <Card.Header style={{ color: "rgb(137, 143, 150)" }}>
-                    Chat with <span style={{fontWeight: "900", color: "white"}}>{dialogue.other_user.nickname}</span> about <span style={{fontWeight: "900", color: "white"}}>{dialogue.post.title}</span>
-                </Card.Header>
-                <Card.Body style={{ height: "400px", overflowY: "auto" }}>
-                    {dialogue.messages.map((msg) => (
-                        <div
-                            key={msg.id}
-                            style={{
-                                textAlign:
-                                    msg.user_id === dialogue.other_user.id ? "left" : "right",
-                                marginBottom: "10px",
-                            }}
-                        >
-                            <div
-                                style={{
-                                    display: "inline-block",
-                                    padding: "8px 10px",
-                                    backgroundColor:
-                                        msg.user_id === dialogue.other_user.id
-                                            ? "rgb(23, 25, 27)"
-                                            : "rgb(25, 135, 84)",
-                                    borderRadius: "12px",
-                                    maxWidth: "70%",
-                                    color: "white",
-                                }}
-                            >
-                                {msg.message}
-                            </div>
+        <div
+            style={{
+                width: "400px",
+                borderRadius: "12px",
+                border: "1px solid #D9A441",
+            }}
+        >
+            <div
+                className="noise-overlay"
+                style={{
+                    color: "rgb(137, 143, 150)",
+                    padding: "12px",
+                    borderBottom: "1px solid #D9A441"
+                }}
+            >
+                Chat with <span style={{ fontWeight: "900", color: "white" }}>{dialogue.other_user.nickname}</span> about <span style={{ fontWeight: "900", color: "white" }}>{dialogue.post.title}</span>
+            </div>
+            <div
+                style={{
+                    height: "400px",
+                    overflowY: "auto",
+                    padding: "12px",
+
+                }}
+            >
+                {dialogue.messages.map((msg) => (
+                    <div
+                        key={msg.id}
+                        style={{
+                            textAlign: msg.user_id === dialogue.other_user.id ? "left" : "right",
+                            marginBottom: "10px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: msg.user_id === dialogue.other_user.id ? "flex-start" : "flex-end"
+                        }}
+                    >
+                        {msg.user_id != dialogue.other_user.id && (
                             <div
                                 style={{
                                     fontSize: "9px",
@@ -156,34 +155,59 @@ const Chat: React.FC = () => {
                             >
                                 {new Date(msg.timestamp).toLocaleString()}
                             </div>
+                        )}
+                        <div
+                            style={{
+                                display: "inline-block",
+                                padding: "8px 10px",
+                                backgroundColor: msg.user_id === dialogue.other_user.id ? "#D9A441" : "none",
+                                borderRadius: "12px",
+                                maxWidth: "70%",
+                                color: msg.user_id === dialogue.other_user.id ? "#0D0D0D" : "white",
+                                border: msg.user_id === dialogue.other_user.id ? "none" : "1.4px solid #D9A441"
+                            }}
+                        >
+                            {msg.message}
                         </div>
-                    ))}
-                </Card.Body>
-                <Card.Footer>
-                    <Form
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            sendMessage();
-                        }}
-                    >
-                        <div style={{ display: "flex", gap: "8px" }}>
-                            <Form.Control
-                                type="text"
-                                placeholder="Type a message"
-                                value={newMessage}
+                        {msg.user_id === dialogue.other_user.id && (
+                            <div
                                 style={{
-                                    backgroundColor: "rgb(23, 25, 27)",
+                                    fontSize: "9px",
+                                    color: "#6c757d",
+                                    margin: "3px 8px",
                                 }}
-                                onChange={(e) => setNewMessage(e.target.value)}
-                            />
-                            <Button type="submit" variant="success">
-                                <FontAwesomeIcon icon={faShare} />
-                            </Button>
-                        </div>
-                    </Form>
-                </Card.Footer>
-            </Card>
-        </PageWrapper>
+                            >
+                                {new Date(msg.timestamp).toLocaleString()}
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
+            <div
+                style={{
+                    padding: "12px"
+                }}
+            >
+                <Form
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        sendMessage();
+                    }}
+                >
+                    <div style={{ display: "flex", gap: "8px" }}>
+                        <Form.Control
+                            type="text"
+                            placeholder="Type a message"
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                        />
+                        <Button type="submit" variant="success">
+                            <SentMessageIcon />
+                        </Button>
+                    </div>
+                </Form>
+            </div>
+        </div>
     );
 };
 

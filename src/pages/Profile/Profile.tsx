@@ -1,40 +1,15 @@
-import React, { useState, useEffect, CSSProperties } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, Button, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import "bootstrap/dist/css/bootstrap.min.css";
-import { FontAwesomeIcon, FontAwesomeIconProps } from "@fortawesome/react-fontawesome";
-import {
-    faPerson,
-    faInbox,
-    faPhone,
-    faClock,
-    faScaleBalanced,
-    faWrench,
-    faXmark
-} from "@fortawesome/free-solid-svg-icons";
 
 import PageWrapper from "../../components/PageWrapper/PageWrapper";
+import MyChats from "../MyChats/MyChats";
+import Chat from "../Chat/Chat";
 
-interface InfoFieldProps {
-    icon: FontAwesomeIconProps["icon"];
-    text: string;
-    value: string;
-    style?: CSSProperties;
-}
-
-const InfoField: React.FC<InfoFieldProps> = ({ icon, text, value, style }) => {
-    return (
-        <li style={{
-            marginBottom: "4px",
-            ...style,
-        }}>
-            <FontAwesomeIcon icon={icon} style={{ marginRight: 6, width: "17px" }} />
-            {text}: <strong style={{ color: "white" }}>{value}</strong>
-        </li>
-    );
-};
+import Polygon from "../../assets/icons/Polygon.svg?react";
 
 interface UserData {
     id: number;
@@ -55,6 +30,9 @@ const ProfilePage: React.FC = () => {
     const [editedName, setEditedName] = useState("");
     const [editedSurname, setEditedSurname] = useState("");
     const [editedPhone, setEditedPhone] = useState("");
+
+    const [activeTab, setActiveTab] = useState<"my notices" | "chat" | "settings">("my notices");
+    const [selectedChat, setSelectedChat] = useState<{ userId: number, postId: number } | null>(null);
 
     const API_URL = import.meta.env.VITE_API_URL;
 
@@ -89,44 +67,44 @@ const ProfilePage: React.FC = () => {
         fetchUser();
     }, [navigate]);
 
-    const handleLogoutOrUpdate = async (e: React.FormEvent) => {
+    const handleLogout = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (isEditing) {
-            try {
-                const token = localStorage.getItem("token");
+        localStorage.removeItem("token");
+        localStorage.removeItem("username");
+        window.dispatchEvent(new Event("loggedOut"));
+        navigate("/login");
+    }
 
-                await axios.put(`${API_URL}/update-profile`, {
-                    name: editedName,
-                    surname: editedSurname,
-                    phone: editedPhone
-                }, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json"
-                    }
-                });
+    const handleUpdate = async (e: React.FormEvent) => {
+        e.preventDefault();
 
-                setUser((prev) => prev ? {
-                    ...prev,
-                    name: editedName,
-                    surname: editedSurname,
-                    phone: editedPhone
-                } : null);
+        try {
+            const token = localStorage.getItem("token");
 
-                setIsEditing(false);
-            } catch (err) {
-                console.error("Failed to update profile", err);
-            }
-        } else {
-            localStorage.removeItem("token");
-            localStorage.removeItem("username");
-            window.dispatchEvent(new Event("loggedOut"));
-            navigate("/login");
+            await axios.put(`${API_URL}/update-profile`, {
+                name: editedName,
+                surname: editedSurname,
+                phone: editedPhone
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            });
+
+            setUser((prev) => prev ? {
+                ...prev,
+                name: editedName,
+                surname: editedSurname,
+                phone: editedPhone
+            } : null);
+
+            setIsEditing(false);
+        } catch (err) {
+            console.error("Failed to update profile", err);
         }
     };
-
-    const toggleEdit = () => setIsEditing(!isEditing);
 
     if (loading) {
         return (
@@ -140,75 +118,199 @@ const ProfilePage: React.FC = () => {
 
     return (
         <PageWrapper>
-            <div>
-                <ul style={{ color: "rgba(255, 255, 255, 0.25)", paddingLeft: 0, listStyle: "none" }}>
-                    {isEditing ? (
-                        <>
-                            <li style={{ marginBottom: "4px", display: "flex", alignItems: "center" }}>
-                                <FontAwesomeIcon icon={faPerson} style={{ marginRight: 6, width: "17px", position: "relative", top: "16px", fontSize: "120%" }} />
-                                <Form.Control
-                                    type='text'
-                                    placeholder='Name'
-                                    value={editedName}
-                                    onChange={(e) => setEditedName(e.target.value)}
-                                    required
-                                />
-                            </li>
-                            <li style={{ marginBottom: "4px", display: "flex", alignItems: "center" }}>
-                                <Form.Control
-                                    style={{
-                                        marginLeft: "22px"
-                                    }}
-                                    type='text'
-                                    placeholder='Surname'
-                                    value={editedSurname}
-                                    onChange={(e) => setEditedSurname(e.target.value)}
-                                    required
-                                />
-                            </li>
-                            <li style={{ display: "flex", alignItems: "center", marginBottom: "12px" }}>
-                                <FontAwesomeIcon icon={faPhone} style={{ marginRight: 6, width: "17px" }} />
-                                <Form.Control
-                                    type='text'
-                                    placeholder='Phone'
-                                    value={editedPhone}
-                                    onChange={(e) => setEditedPhone(e.target.value)}
-                                    required
-                                />
-                            </li>
-                        </>
-                    ) : (
-                        <>
-                            <InfoField style={{ fontSize: "120%", marginBottom: "6px" }} icon={faPerson} text={"Name"} value={`${user.name} ${user.surname}`} />
-                            <InfoField icon={faPhone} text={"Phone"} value={user.phone} />
-                        </>
-                    )}
-                    <InfoField icon={faInbox} text={"Email"} value={user.email} />
-                    <InfoField icon={faScaleBalanced} text={"Role"} value={user.role} />
-                    <InfoField
-                        icon={faClock}
-                        text={"Created"}
-                        value={new Date(user.createdAt).toLocaleString("en-EN", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit"
-                        })}
-                    />
-                </ul>
-
-                <Form style={{ width: "300px", marginTop: "16px", display: "flex" }} onSubmit={handleLogoutOrUpdate}>
-                    <Button className='w-100' variant={isEditing ? 'success' : 'dark'} type='submit'>
-                        {isEditing ? "Confirm changes" : "Exit account"}
-                    </Button>
-                    <Button style={{ marginLeft: "12px" }} variant='secondary' onClick={toggleEdit}>
-                        <FontAwesomeIcon style={isEditing ? {width: "13px", fontSize: "110%"} : {}} icon={isEditing ? faXmark : faWrench} />
-                    </Button>
-                </Form>
+            <div
+                style={{
+                    display: "flex",
+                    width: "100%",
+                    padding: "0 104px"
+                }}
+            >
+                <Polygon width={180} height={180} fill="#D9A441" />
+                <div
+                    style={{
+                        padding: "60px 12px"
+                    }}
+                >
+                    <p
+                        style={{
+                            color: "white",
+                            textTransform: "uppercase",
+                            fontSize: "120%"
+                        }}
+                    >{user.name} {user.surname}</p>
+                    <p
+                        style={{
+                            color: "#a6a6a6"
+                        }}
+                    >{user.email}</p>
+                </div>
             </div>
+            <div
+                style={{
+                    display: "flex",
+                    width: "100%",
+                    padding: "0 30px",
+                    position: "relative",
+                    top: "-36px"
+                }}
+            >
+                {[
+                    { label: "MY NOTICES", key: "my notices" },
+                    { label: "CHAT", key: "chat" },
+                    { label: "SETTINGS", key: "settings" }
+                ].map(({ label, key }) => {
+                    const isActive = activeTab === key;
+                    return (
+                        <div
+                            key={key}
+                            onClick={() => setActiveTab(key as "my notices" | "chat" | "settings")}
+                            style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                cursor: "pointer",
+                                width: "164px"
+                            }}
+                        >
+                            <Polygon
+                                width={180}
+                                height={180}
+                                style={{
+                                    fill: isActive ? "#D9A441" : "none"
+                                }}
+                            />
+                            <p
+                                style={{
+                                    position: "relative",
+                                    top: "-100px",
+                                    fontWeight: isActive ? "bold" : "normal",
+                                    color: isActive ? "#000" : "#fff",
+                                    textAlign: "center",
+                                    width: "100%",
+                                    textTransform: "uppercase"
+                                }}
+                            >
+                                {label}
+                            </p>
+                        </div>
+                    );
+                })}
+            </div>
+            <div
+                style={{
+                    display: "flex",
+                    width: "100%",
+                    alignItems: "flex-end"
+                }}
+            >
+                <p
+                    style={{
+                        padding: "0px 14px",
+                        color: "white",
+                        fontSize: "120%",
+                        textTransform: "uppercase"
+                    }}
+                >
+                    {activeTab.replace(/^\w/, c => c.toUpperCase())}
+                </p>
+                <div
+                    style={{
+                        flex: "1",
+                        height: "1px",
+                        backgroundColor: "#E9E9E9",
+                        marginBottom: "5px"
+                    }}
+                />
+            </div>
+            {activeTab === "chat" && (
+                <div style={{ display: "flex", gap: "32px", padding: "20px 30px" }}>
+                    <div style={{ flex: 1 }}>
+                        <MyChats onSelectChat={(userId, postId) => setSelectedChat({ userId, postId })} />
+                    </div>
+                    {selectedChat && (
+                        <Chat userId={selectedChat.userId} postId={selectedChat.postId} />
+                    )}
+                </div>
+            )}
+            {activeTab === "settings" && (
+                <div
+                    style={{
+                        width: "100%",
+                        padding: "0 14px",
+                        marginTop: "28px"
+                    }}
+                >
+                    <div
+                        className="noise-overlay"
+                        style={{
+                            display: "flex",
+                            gap: "14px",
+                            padding: "28px 40px"
+                        }}
+                    >
+                        <div>
+                            <p
+                                style={{
+                                    color: "white",
+                                    margin: "0 0 8px 4px"
+                                }}
+                            >Change name</p>
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter new name"
+                                value={editedName}
+                                onChange={(e) => setEditedName(e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <p
+                                style={{
+                                    color: "white",
+                                    margin: "0 0 8px 4px"
+                                }}
+                            >Change surname</p>
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter new surname"
+                                value={editedSurname}
+                                onChange={(e) => setEditedSurname(e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <p
+                                style={{
+                                    color: "white",
+                                    margin: "0 0 8px 4px"
+                                }}
+                            >Change phone number</p>
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter new phone"
+                                value={editedPhone}
+                                onChange={(e) => setEditedPhone(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <Form
+                        style={{
+                            marginTop: "16px",
+                            display: "flex",
+                            padding: "0 28px",
+                            justifyContent: "space-between"
+                        }}
+                    >
+                        <Button variant={isEditing ? 'success' : 'dark'} onClick={handleLogout}>
+                            Exit account
+                        </Button>
+                        <Button style={{ marginLeft: "12px" }} variant='secondary' onClick={handleUpdate}>
+                            Save changes
+                        </Button>
+                    </Form>
+                </div>
+            )}
         </PageWrapper>
     );
 };
 
 export default ProfilePage;
+

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button, Alert } from "react-bootstrap";
-import "./Auth.css"
+import { useNavigate } from "react-router-dom";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -11,6 +11,8 @@ import { faFaceSadTear, faFaceLaugh } from "@fortawesome/free-solid-svg-icons";
 import PageWrapper from "../../components/PageWrapper/PageWrapper";
 
 const AuthPage: React.FC = () => {
+    const navigate = useNavigate();
+
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -45,13 +47,9 @@ const AuthPage: React.FC = () => {
                 localStorage.setItem("token", response.data.access_token);
                 localStorage.setItem("username", email);
 
-                setMessage({
-                    text: "Login successful!",
-                    variant: "success",
-                    icon: faFaceLaugh,
-                });
-
                 window.dispatchEvent(new Event("loggedIn"));
+
+                navigate("/profile");
             } else {
                 await axios.post(`${API_URL}/register`, {
                     name,
@@ -191,7 +189,7 @@ const AuthPage: React.FC = () => {
                     {isLogin ? "Don't have an account? " : "Already have an account? "}
                     <span
                         style={{
-                            color: "rgb(87, 165, 204)",
+                            color: "#D9A441",
                             cursor: "pointer",
                         }}
                         onClick={() => setIsLogin(!isLogin)}
@@ -199,8 +197,6 @@ const AuthPage: React.FC = () => {
                         {isLogin ? "Register!" : "Log in!"}
                     </span>
                 </p>
-
-
             </Form>
         </PageWrapper>
     );

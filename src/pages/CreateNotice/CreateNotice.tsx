@@ -2,17 +2,16 @@ import React, { useState, useEffect } from "react";
 import { Form, Button, Spinner, Carousel, InputGroup } from "react-bootstrap";
 import Select from "react-select";
 import { useNavigate } from "react-router-dom";
-import "./CreateNotice.css";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     faTrash,
-    faChevronLeft,
-    faChevronRight
 } from "@fortawesome/free-solid-svg-icons";
 
 import axios from "axios";
 import PageWrapper from "../../components/PageWrapper/PageWrapper";
+
+import ButtonRight from "../../assets/icons/ButtonRight.svg?react";
 
 const CreateNotice: React.FC = () => {
     const navigate = useNavigate();
@@ -93,20 +92,44 @@ const CreateNotice: React.FC = () => {
 
     return (
         <PageWrapper>
-            <div style={{ gap: "40px", justifyContent: "center", display: "flex" }}>
-                <div style={{ width: "240px" }}>
-                    <Form onSubmit={handleSubmit}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Title</Form.Label>
-                            <Form.Control value={title} onChange={(e) => setTitle(e.target.value)} required />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Caption</Form.Label>
-                            <Form.Control as="textarea" rows={3} value={caption} onChange={(e) => setCaption(e.target.value)} required />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
+            <div
+                style={{
+                    width: "100%",
+                    padding: "0 14px",
+                    marginTop: "28px",
+                    paddingBottom: "84px"
+                }}
+            >
+                <div
+                    className="noise-overlay"
+                    style={{
+                        padding: "28px 40px"
+                    }}
+                >
+                    <div>
+                        <p
+                            style={{
+                                color: "white",
+                                margin: "0 0 8px 4px"
+                            }}
+                        >
+                            Enter title
+                        </p>
+                        <Form.Control
+                            type="text"
+                            placeholder="Enter new name"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                        />
+                    </div>
+                    <div
+                        style={{
+                            display: "flex",
+                            gap: "14px",
+                            marginTop: "14px"
+                        }}
+                    >
+                        <Form.Group>
                             <Form.Label>Price</Form.Label>
                             <InputGroup>
                                 <Form.Control
@@ -115,22 +138,33 @@ const CreateNotice: React.FC = () => {
                                     value={price}
                                     onChange={(e) => setPrice(e.target.value)}
                                     required
+                                    style={{
+                                        width: "120px"
+                                    }}
+                                    placeholder="Enter price"
                                 />
                                 <InputGroup.Text style={{
-                                    boxShadow: "inset 1.7px 0 0 rgb(63, 68, 74)",
                                     width: "36px",
                                     display: "flex",
                                     justifyContent: "center",
-                                    userSelect: "none"
+                                    userSelect: "none",
+                                    backgroundColor: "#F2F2F2",
+                                    color: "#0D0D0D",
+                                    border: "3px solid #D9A441",
+                                    boxShadow: "inset 0 0 12px rgba(0, 0, 0, 0.4)",
+                                    fontWeight: "600",
+                                    borderLeft: "none"
                                 }}>₴</InputGroup.Text>
                             </InputGroup>
                         </Form.Group>
-
-                        <Form.Group className="mb-3">
+                        <Form.Group>
                             <Form.Label>Tags (comma-separated)</Form.Label>
-                            <Form.Control value={tags} onChange={(e) => setTags(e.target.value)} />
+                            <Form.Control
+                                value={tags}
+                                onChange={(e) => setTags(e.target.value)}
+                                placeholder="Enter tags"
+                            />
                         </Form.Group>
-
                         <Form.Group className="mb-3">
                             <Form.Label>Category</Form.Label>
                             <Select
@@ -139,53 +173,58 @@ const CreateNotice: React.FC = () => {
                                 styles={{
                                     control: (base) => ({
                                         ...base,
-                                        backgroundColor: "rgb(33, 37, 41)",
-                                        border: "none",
-                                        color: "white",
-                                        minHeight: "29.25px",
-                                        height: "29.25px",
+                                        backgroundColor: "#F2F2F2",
+                                        color: "#0D0D0D",
+                                        border: "3px solid #D9A441",
+                                        boxShadow: "inset 0 0 12px rgba(0, 0, 0, 0.4)",
+                                        fontWeight: 600,
+                                        cursor: "pointer",
+                                        minWidth: "180px"
                                     }),
                                     valueContainer: (base) => ({
                                         ...base,
-                                        height: "29.25px",
                                         padding: "0 8px",
+                                        color: "#0D0D0D",
                                     }),
                                     indicatorSeparator: () => ({
                                         display: "none",
                                     }),
                                     indicatorsContainer: (base) => ({
                                         ...base,
-                                        height: "29.25px",
-                                        boxShadow: "inset 1px 0 0 rgb(63, 68, 74)"
+                                        boxShadow: "inset 1px 0 0 rgb(217, 164, 65)",
                                     }),
                                     dropdownIndicator: (base) => ({
                                         ...base,
-                                        color: "rgb(137, 143, 150)"
+                                        color: "#D9A441",
+                                        cursor: "pointer",
                                     }),
                                     input: (base) => ({
                                         ...base,
                                         margin: 0,
                                         padding: 0,
+                                        color: "#0D0D0D",
+                                        fontWeight: 600,
                                     }),
                                     menu: (base) => ({
                                         ...base,
-                                        backgroundColor: "rgb(33, 37, 41)",
+                                        backgroundColor: "#F2F2F2",
                                         zIndex: 10,
+                                        color: "#0D0D0D",
+                                        fontWeight: 600,
                                     }),
                                     option: (base, state) => ({
                                         ...base,
-                                        backgroundColor: state.isFocused
-                                            ? "rgb(25, 135, 84)"
-                                            : "rgb(33, 37, 41)",
-                                        color: "white",
+                                        backgroundColor: state.isFocused ? "#D9A441" : "#F2F2F2",
+                                        color: "#0D0D0D",
                                         cursor: "pointer",
-                                        height: "29.25px",
                                         display: "flex",
                                         alignItems: "center",
+                                        fontWeight: 600,
                                     }),
                                     singleValue: (base) => ({
                                         ...base,
-                                        color: "white",
+                                        color: "#0D0D0D",
+                                        fontWeight: 600,
                                     }),
                                 }}
                                 theme={(theme) => ({
@@ -193,37 +232,53 @@ const CreateNotice: React.FC = () => {
                                     borderRadius: 4,
                                     colors: {
                                         ...theme.colors,
-                                        primary25: "rgb(25, 135, 84)",
-                                        primary: "rgb(25, 135, 84)",
+                                        primary25: "#D9A441",
+                                        primary: "#D9A441",
+                                        neutral0: "#F2F2F2",
+                                        neutral80: "#0D0D0D",
                                     },
                                 })}
                             />
                         </Form.Group>
-                        <Button className="w-100" type="submit" variant="success" disabled={loading}>
-                            {loading ? <Spinner animation="border" size="sm" /> : "Create Notice"}
-                        </Button>
-                    </Form>
+                    </div>
                 </div>
-
-                <div style={{ width: "340px" }}>
-                    <Form.Group className="mb-3">
+                <div
+                    className="noise-overlay"
+                    style={{
+                        padding: "28px 40px",
+                        marginTop: "28px"
+                    }}
+                >
+                    <Form.Group
+                        style={{
+                            width: "320px",
+                            marginBottom: "14px"
+                        }}
+                    >
                         <Form.Label>Upload Images (up to 6)</Form.Label>
                         <Form.Control type="file" multiple accept="image/*" onChange={handleImageChange} />
                     </Form.Group>
 
                     {images.length > 0 && (
-                        <div style={{ position: "relative" }}>
+                        <div
+                            style={{
+                                position: "relative",
+                                width: "320px"
+                            }}
+                        >
                             <Carousel
                                 activeIndex={activeIndex}
                                 onSelect={(selectedIndex) => setActiveIndex(selectedIndex)}
                                 prevIcon={
-                                    <span style={{ color: "rgb(23, 25, 27)", fontSize: "2rem" }}>
-                                        <FontAwesomeIcon icon={faChevronLeft} />
+                                    <span style={{
+                                        transform: "scaleX(-1)"
+                                    }}>
+                                        <ButtonRight width={60} height={60} />
                                     </span>
                                 }
                                 nextIcon={
-                                    <span style={{ color: "rgb(23, 25, 27)", fontSize: "2rem" }}>
-                                        <FontAwesomeIcon icon={faChevronRight} />
+                                    <span style={{ width: "24px", height: "24px", display: "inline-block" }}>
+                                        <ButtonRight width={60} height={60} />
                                     </span>
                                 }
                             >
@@ -252,8 +307,6 @@ const CreateNotice: React.FC = () => {
                                     </Carousel.Item>
                                 ))}
                             </Carousel>
-
-
                             <Button
                                 variant="dark"
                                 size="sm"
@@ -274,6 +327,36 @@ const CreateNotice: React.FC = () => {
                             </Button>
                         </div>
                     )}
+                </div>
+                <div
+                    className="noise-overlay"
+                    style={{
+                        padding: "28px 40px",
+                        marginTop: "28px"
+                    }}
+                >
+                    <Form.Group>
+                        <Form.Label>Caption</Form.Label>
+                        <Form.Control
+                            as="textarea"
+                            rows={3}
+                            value={caption}
+                            onChange={(e) => setCaption(e.target.value)}
+                            required
+                            placeholder="Enter caption"
+                        />
+                    </Form.Group>
+                </div>
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        marginTop: "28px"
+                    }}
+                >
+                    <Button type="submit" variant="success" disabled={loading} onClick={handleSubmit}>
+                        {loading ? <Spinner animation="border" size="sm" /> : "Create Notice"}
+                    </Button>
                 </div>
             </div>
         </PageWrapper>

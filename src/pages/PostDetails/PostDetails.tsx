@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import { Spinner, Card, Alert, Button, Modal, Form } from "react-bootstrap";
+import { Spinner, Alert, Button, Modal, Form } from "react-bootstrap";
 import { Carousel } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft, faChevronRight, faEye, faMessage, faPhone, faEnvelope, faUser, faFlag, faShare, faHammer, faEraser } from "@fortawesome/free-solid-svg-icons";
+import { faShare, faHammer } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import PageWrapper from "../../components/PageWrapper/PageWrapper";
+
+import UserIcon from "../../assets/icons/UserIcon.svg?react";
+import ButtonRight from "../../assets/icons/ButtonRight.svg?react";
+import HollowStar from "../../assets/icons/HollowStar.svg?react";
+import FullStar from "../../assets/icons/FullStar.svg?react";
 
 interface User {
     id: number;
@@ -16,6 +21,7 @@ interface User {
     email: string;
     avatarBase64?: string | null;
     createdAt: string;
+    rating: number;
 }
 
 interface Post {
@@ -260,29 +266,7 @@ const PostDetails: React.FC = () => {
         }
     };
 
-    const handleDeletePost = async () => {
-        if (!post) return;
-        if (!window.confirm("Are you sure you want to delete this post?")) return;
-
-        try {
-            await axios.delete(`${API_URL}/posts/${post.id}`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            });
-            alert("Post deleted successfully");
-            navigate("/");
-        } catch (error: any) {
-            if (axios.isAxiosError(error)) {
-                alert(error.response?.data?.detail || "Failed to delete post");
-            } else {
-                alert("Failed to delete post");
-            }
-        }
-    };
-
     const isAuthor = userEmail === post.user.email;
-    const canDelete = isAuthor || role === "admin" || role === "owner";
 
     return (
         <PageWrapper>
@@ -292,70 +276,92 @@ const PostDetails: React.FC = () => {
                 <Alert variant="danger">{error}</Alert>
             ) : (
                 <>
-                    <div style={{ display: "flex", gap: "12px" }}>
-                        <Card
-                            style={{
-                                backgroundColor: "rgb(33, 37, 41)",
-                                color: "white",
-                                borderRadius: "12px",
-                                width: "420px",
-                                display: "flex",
-                                flexDirection: "column",
-                                justifyContent: "space-between",
-                            }}
-                        >
-                            {images.length > 0 && (
-                                <div style={{ position: "relative" }}>
-                                    <Carousel
-                                        activeIndex={activeIndex}
-                                        onSelect={(selectedIndex) => setActiveIndex(selectedIndex)}
-                                        prevIcon={
-                                            <span style={{ color: "rgb(23, 25, 27)", fontSize: "2rem" }}>
-                                                <FontAwesomeIcon icon={faChevronLeft} />
-                                            </span>
-                                        }
-                                        nextIcon={
-                                            <span style={{ color: "rgb(23, 25, 27)", fontSize: "2rem" }}>
-                                                <FontAwesomeIcon icon={faChevronRight} />
-                                            </span>
-                                        }
-                                    >
-                                        {images.map((src, index) => (
-                                            <Carousel.Item key={index}>
-                                                <div
+                    <div
+                        style={{
+                            display: "flex",
+                            gap: "40px",
+                            width: "100%"
+                        }}
+                    >
+                        {images.length > 0 && (
+                            <div style={{ position: "relative" }}>
+                                <Carousel
+                                    activeIndex={activeIndex}
+                                    onSelect={(selectedIndex) => setActiveIndex(selectedIndex)}
+                                    prevIcon={
+                                        <span style={{
+                                            transform: "scaleX(-1)"
+                                        }}>
+                                            <ButtonRight width={60} height={60} />
+                                        </span>
+                                    }
+                                    nextIcon={
+                                        <span style={{ width: "24px", height: "24px", display: "inline-block" }}>
+                                            <ButtonRight width={60} height={60} />
+                                        </span>
+                                    }
+                                >
+                                    {images.map((src, index) => (
+                                        <Carousel.Item key={index}>
+                                            <div
+                                                style={{
+                                                    width: "100%",
+                                                    height: "350px",
+                                                    backgroundColor: "#000",
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                    alignItems: "center",
+                                                    overflow: "hidden",
+                                                }}
+                                            >
+                                                <img
+                                                    src={src}
+                                                    alt={`Image ${index + 1}`}
                                                     style={{
                                                         width: "100%",
-                                                        height: "350px",
-                                                        backgroundColor: "#000",
-                                                        display: "flex",
-                                                        justifyContent: "center",
-                                                        alignItems: "center",
-                                                        overflow: "hidden",
+                                                        height: "100%",
+                                                        objectFit: "cover",
                                                     }}
-                                                >
-                                                    <img
-                                                        src={src}
-                                                        alt={`Image ${index + 1}`}
-                                                        style={{
-                                                            width: "100%",
-                                                            height: "100%",
-                                                            objectFit: "cover",
-                                                        }}
-                                                    />
-                                                </div>
-                                            </Carousel.Item>
-                                        ))}
-                                    </Carousel>
+                                                />
+                                            </div>
+                                        </Carousel.Item>
+                                    ))}
+                                </Carousel>
+                            </div>
+                        )}
+                        <div
+                            className="noise-overlay"
+                            style={{
+                                flex: "1",
+                                padding: "28px",
+                                display: "flex",
+                                flexDirection: "column",
+                                justifyContent: "space-between"
+                            }}
+                        >
+                            <div>
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        fontSize: "80%",
+                                        color: "#a6a6a6"
+                                    }}
+                                >
+                                    <p>Published {formatDate(post.createdAt)}</p>
+                                    <div>
+                                        Views: {post.views}
+                                    </div>
                                 </div>
-                            )}
-
-                            <Card.Body>
-                                <div>
+                                <div style={{
+                                    color: "#F2F2F2",
+                                    marginTop: "12px"
+                                }}>
                                     <p
                                         style={{
-                                            margin: 0,
                                             fontWeight: "bold",
-                                            fontSize: "140%",
+                                            textTransform: "uppercase",
+                                            marginBottom: "6px"
                                         }}
                                     >
                                         {post.title}
@@ -363,144 +369,138 @@ const PostDetails: React.FC = () => {
                                     <p
                                         style={{
                                             marginBottom: "8px",
-                                            fontWeight: "100",
-                                            fontSize: "90%",
+                                            fontWeight: "lighter",
+                                            fontSize: "90%"
                                         }}
                                     >
-                                        {post.caption.length > 100
-                                            ? post.caption.slice(0, 100) + "..."
-                                            : post.caption}
+                                        {post.caption}
                                     </p>
                                 </div>
-                                <h5
+                                <p
                                     style={{
-                                        margin: 0,
-                                        color: "rgb(25, 135, 84)",
-                                        fontSize: "130%",
+                                        color: "#D9A441",
+                                        fontWeight: "bold",
+                                        fontSize: "120%",
+                                        marginTop: "28px"
                                     }}
                                 >
                                     {post.price.toLocaleString("de-DE")}₴
-                                </h5>
-                            </Card.Body>
-
-                            <Card.Footer>
-                                <div
-                                    style={{
-                                        color: "rgb(137, 143, 150)",
-                                        display: "flex",
-                                        justifyContent: "space-between",
-                                        alignItems: "center",
-                                    }}
-                                >
-                                    <div>Posted {formatDate(post.createdAt)}</div>
-                                    <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-                                        <div>
-                                            <FontAwesomeIcon icon={faEye} /> {post.views}
-                                        </div>
-                                        {role && (
-                                            <Button
-                                                variant="danger"
-                                                onClick={() => {
-                                                    if (canDelete) {
-                                                        handleDeletePost();
-                                                    } else {
-                                                        openReportModal("post");
-                                                    }
-                                                }}
-                                                title={canDelete ? "Delete Post" : "Report Post"}
-                                            >
-                                                <FontAwesomeIcon icon={canDelete ? faEraser : faFlag} />
-                                            </Button>
-                                        )}
-                                    </div>
-                                </div>
-                            </Card.Footer>
-                        </Card>
-                        <Card
-                            style={{
-                                backgroundColor: "rgb(33, 37, 41)",
-                                color: "white",
-                                borderRadius: "12px",
-                                flex: 1,
-                                padding: "1rem",
-                                height: "fit-content",
-                                alignSelf: "start",
-                            }}
-                        >
-                            <p style={{ fontSize: "90%", color: "rgb(137, 143, 150)" }}>Posted by:</p>
-                            <div
-                                style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    marginBottom: "1rem",
-                                    marginTop: "1rem"
-                                }}
-                            >
-                                {post.user.avatarBase64 ? (
-                                    <img
-                                        src={
-                                            post.user.avatarBase64.startsWith("data:")
-                                                ? post.user.avatarBase64
-                                                : `data:image/jpeg;base64,${post.user.avatarBase64}`
-                                        }
-                                        alt={`${post.user.name} avatar`}
-                                        style={{
-                                            width: "100px",
-                                            height: "100px",
-                                            borderRadius: "50%",
-                                            objectFit: "cover",
-                                            marginBottom: "0.5rem",
-                                        }}
-                                    />
-                                ) : (
-                                    <FontAwesomeIcon icon={faUser} size="6x" style={{ marginBottom: "0.5rem" }} />
-                                )}
-
-                                <h5 style={{ fontSize: "140%", marginBottom: "2px" }}>
-                                    {post.user.name} {post.user.surname}
-                                </h5>
-                                <p style={{ fontSize: "90%", color: "rgb(137, 143, 150)" }}>Joined {formatDate(post.user.createdAt)}</p>
-                            </div>
-
-                            <div style={{ fontSize: "0.9rem", color: "rgb(137, 143, 150)" }}>
-                                {post.user.phone && (
-                                    <p>
-                                        <FontAwesomeIcon icon={faPhone} /> {post.user.phone}
-                                    </p>
-                                )}
-                                <p>
-                                    <FontAwesomeIcon icon={faEnvelope} /> {post.user.email}
                                 </p>
                             </div>
-                            {!isAuthor && role && (
-                                <div style={{ display: "flex", marginTop: "12px", gap: "10px" }}>
-                                    <Button
-                                        variant="success"
-                                        style={{
-                                            flex: "1"
-                                        }}
-                                        onClick={() => navigate(`/chat/${post.userId}?postId=${post.id}`)}
-                                    >
-                                        <FontAwesomeIcon icon={faMessage} /> Contact
-                                    </Button>
-                                    <Button
-                                        variant="danger"
-                                        onClick={() => {
-                                            if (role === "admin" || role === "owner") {
-                                                openBlockModal();
-                                            } else {
-                                                openReportModal("user");
-                                            }
-                                        }}
-                                    >
-                                        <FontAwesomeIcon
-                                            icon={role === "owner" || role === "admin" ? faHammer : faFlag}
-                                        />
-                                    </Button>
+                            <div
+                                style={{
+                                    color: "#F2F2F2"
+                                }}
+                            >
+                                <p>
+                                    Contact seller
+                                </p>
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "flex-end",
+                                        marginTop: "8px"
+                                    }}
+                                >
+                                    <div style={{
+                                        display: "flex",
+                                        alignItems: "center"
+                                    }}>
+                                        <div
+                                            className="hexagon"
+                                            style={{
+                                                width: "80px",
+                                                height: "80px",
+                                                backgroundColor: "#D9A441",
+                                                overflow: "hidden",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                            }}
+                                        >
+                                            {post.user.avatarBase64 ? (
+                                                <img
+                                                    src={
+                                                        post.user.avatarBase64.startsWith("data:")
+                                                            ? post.user.avatarBase64
+                                                            : `data:image/jpeg;base64,${post.user.avatarBase64}`
+                                                    }
+                                                    alt={`${post.user.name} avatar`}
+                                                    style={{
+                                                        width: "100%",
+                                                        height: "100%",
+                                                        objectFit: "cover",
+                                                        borderRadius: 0,
+                                                    }}
+                                                />
+                                            ) : (
+                                                <UserIcon
+                                                    style={{
+                                                        width: "50%",
+                                                        height: "50%",
+                                                        marginBottom: "0.5rem",
+                                                    }}
+                                                    aria-label="Default user icon"
+                                                />
+                                            )}
+                                        </div>
+                                        <div style={{ marginLeft: "8px" }}>
+                                            <p>{post.user.name} {post.user.surname}</p>
+                                            <p style={{ fontSize: "80%" }}>{post.user.email}</p>
+                                            <p style={{ fontSize: "80%" }}>{post.user.phone}</p>
+                                            <div style={{ display: "flex", gap: "4px", marginTop: "4px" }}>
+                                                {[...Array(5)].map((_, i) => {
+                                                    if (post.user.rating === undefined) {
+                                                        return <HollowStar key={i} width={20} height={20} />;
+                                                    }
+                                                    return i < post.user.rating
+                                                        ? <FullStar key={i} width={20} height={20} />
+                                                        : <HollowStar key={i} width={20} height={20} />;
+                                                })}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {!isAuthor && role && (
+                                        <div style={{ display: "flex", gap: "28px" }}>
+                                            <Button
+                                                onClick={() => navigate(`/chat/${post.userId}?postId=${post.id}`)}
+                                                style={{
+                                                    height: '41px',
+                                                    padding: "0px 18px",
+                                                    borderRadius: '4px',
+                                                    backgroundColor: "#D9A441",
+                                                    border: "none",
+                                                    boxShadow: 'inset 0 0 8px rgba(0, 0, 0, 0.3)',
+                                                }}
+                                            >
+                                                Chat
+                                            </Button>
+
+                                            <Button
+                                                style={{
+                                                    height: '41px',
+                                                    padding: "0px 18px",
+                                                    borderRadius: '4px',
+                                                    backgroundColor: "#D9A441",
+                                                    border: "none",
+                                                    boxShadow: 'inset 0 0 8px rgba(0, 0, 0, 0.3)',
+                                                }}
+                                                onClick={() => {
+                                                    if (role === "admin" || role === "owner") {
+                                                        openBlockModal();
+                                                    } else {
+                                                        openReportModal("user");
+                                                    }
+                                                }}
+                                            >
+                                                {role === "owner" || role === "admin" ? "Ban" : "Report"}
+                                            </Button>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
-                        </Card>
+                            </div>
+                        </div>
                     </div>
 
                     <Modal show={showReportModal} onHide={closeReportModal} centered>
@@ -574,8 +574,9 @@ const PostDetails: React.FC = () => {
                         </Modal.Footer>
                     </Modal>
                 </>
-            )}
-        </PageWrapper>
+            )
+            }
+        </PageWrapper >
     );
 };
 

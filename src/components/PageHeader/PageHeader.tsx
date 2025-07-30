@@ -1,66 +1,11 @@
 import { FC, useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./PageHeader.css";
 
-import { Navbar, Nav } from "react-bootstrap";
+import { Navbar, Nav, Button } from "react-bootstrap";
 
-import { FontAwesomeIcon, FontAwesomeIconProps } from "@fortawesome/react-fontawesome";
-import {
-  faUser,
-  faRightToBracket,
-  faBullhorn,
-  faCirclePlus,
-  faStore,
-  faMessage,
-  faGear,
-  faShieldHalved,
-  faCertificate
-} from "@fortawesome/free-solid-svg-icons";
-
-interface CustomNavLinkProps {
-  icon: FontAwesomeIconProps["icon"];
-  secondIcon?: FontAwesomeIconProps["icon"];
-  text: string;
-  link: string;
-}
-
-const CustomNavLink: React.FC<CustomNavLinkProps> = ({ icon, text, link, secondIcon }) => {
-  const location = useLocation();
-
-  return (
-    <Nav>
-      <Nav.Link
-        as={Link}
-        to={link}
-        className={`custom-nav-link ${location.pathname === link ? "selected" : ""}`}
-        style={{ padding: "0px 22px" }}
-      >
-        <FontAwesomeIcon
-          style={{
-            position: "relative",
-            top: secondIcon ? "-2px" : 0
-          }}
-          icon={icon}
-        /> {secondIcon && (
-          <div style={{ position: "absolute" }}>
-            <FontAwesomeIcon
-              style={{
-                position: "relative",
-                fontSize: "70%",
-                border: "rgb(23, 25, 27) 1.8px solid",
-                borderRadius: "100%",
-                top: "-17px",
-                left: "-7px",
-                backgroundColor: "rgb(23, 25, 27)"
-              }}
-              icon={secondIcon}
-            />
-          </div>
-        )} {text}
-      </Nav.Link>
-    </Nav>
-  );
-};
+import Logo from "../../assets/icons/Logo.svg?react";
+import UserIcon from "../../assets/icons/UserIcon.svg?react";
 
 function parseJwt(token: string) {
   try {
@@ -73,22 +18,18 @@ function parseJwt(token: string) {
 }
 
 const PageHeader: FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => !!localStorage.getItem("token"));
+  const navigate = useNavigate();
+
   const [role, setRole] = useState<string | null>(null);
-  const [isVerified, setIsVerified] = useState<boolean | null>(null);
 
   useEffect(() => {
     function updateUserState() {
       const token = localStorage.getItem("token");
       if (token) {
         const payload = parseJwt(token);
-        setIsLoggedIn(true);
         setRole(payload?.role ?? null);
-        setIsVerified(payload?.isVerified ?? null);
       } else {
-        setIsLoggedIn(false);
         setRole(null);
-        setIsVerified(null);
       }
     }
 
@@ -96,17 +37,13 @@ const PageHeader: FC = () => {
 
     window.addEventListener("loggedIn", updateUserState);
     window.addEventListener("loggedOut", () => {
-      setIsLoggedIn(false);
       setRole(null);
-      setIsVerified(null);
     });
 
     return () => {
       window.removeEventListener("loggedIn", updateUserState);
       window.removeEventListener("loggedOut", () => {
-        setIsLoggedIn(false);
         setRole(null);
-        setIsVerified(null);
       });
     };
   }, []);
@@ -114,36 +51,67 @@ const PageHeader: FC = () => {
   return (
     <Navbar
       style={{
-        width: "100%",
-        borderBottom: "rgb(43, 48, 52) solid 1px",
-        color: "white"
+        width: "100%"
       }}
     >
-      <Nav className="me-auto" style={{ display: "flex", flexDirection: "row" }}>
-        <CustomNavLink link={"/"} icon={faStore} text={"Notices"} />
+      <Nav
+        className="me-auto"
+        style={{
+          display: "flex",
+          alignItems: "center"
+        }}
+      >
+        <Logo width={120} height={80} />
 
-        {!isLoggedIn && <CustomNavLink link={"/login"} icon={faRightToBracket} text={"Login"} />}
+        <div>
+          <Nav.Link
+            as={Link}
+            to={"/"}
+            style={{ 
+              padding: "0px 22px",
+              color: "white"
+            }}
+          >
+            NOTICES
+          </Nav.Link>
 
-        {isLoggedIn && (
-          <>
-            {!isVerified && <CustomNavLink link={"/verify"} icon={faCertificate} text={"Verify"} />}
+          {(role?.toLowerCase() === "admin" || role?.toLowerCase() === "owner") && (
+            <Nav.Link
+              as={Link}
+              to={"/admin-panel"}
+              style={{ padding: "0px 22px" }}
+            >
+              ADMIN PANEL
+            </Nav.Link>
+          )}
 
-            {isVerified && <CustomNavLink link={"/create-notice"} secondIcon={faCirclePlus} icon={faBullhorn} text={"Create notice"} />}
-
-            <CustomNavLink link={"/my-chats"} icon={faMessage} text={"My chats"} />
-
-            {(role?.toLowerCase() === "admin" || role?.toLowerCase() === "owner") && (
-              <CustomNavLink link={"/admin-panel"} icon={faGear} text={"Admin panel"} />
-            )}
-
-            {role?.toLowerCase() === "owner" && (
-              <CustomNavLink link={"/owner-panel"} icon={faShieldHalved} text={"Owner panel"} />
-            )}
-          </>
-        )}
+          {role?.toLowerCase() === "owner" && (
+            <Nav.Link
+              as={Link}
+              to={"/owner-panel"}
+              style={{ padding: "0px 22px" }}
+            >
+              OWNER PANEL
+            </Nav.Link>
+          )}
+        </div>
       </Nav>
       <Nav style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
-        {isLoggedIn && <CustomNavLink link={"/profile"} icon={faUser} text={"Profile"} />}
+        <Button
+          onClick={() => navigate('/profile')}
+          style={{
+            width: '41px',
+            height: '41px',
+            padding: 0,
+            borderRadius: '4px',
+            backgroundColor: "#D9A441",
+            border: "none",
+            boxShadow: 'inset 0 0 8px rgba(0, 0, 0, 0.3)',
+          }}
+          aria-label="Go to profile"
+        >
+          <UserIcon width={22} height={22} />
+        </Button>
       </Nav>
     </Navbar>
   );
