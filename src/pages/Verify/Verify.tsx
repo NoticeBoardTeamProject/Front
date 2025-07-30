@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Form, Button, Alert, Spinner, Carousel } from "react-bootstrap";
+import React, { useState, } from "react";
+import { Form, Button, Alert, Carousel } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faChevronLeft, faChevronRight, faCheck, faImage } from "@fortawesome/free-solid-svg-icons";
 import PageWrapper from "../../components/PageWrapper/PageWrapper";

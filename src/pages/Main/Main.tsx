@@ -287,7 +287,7 @@ const Main: React.FC = () => {
                             {posts.map((post) => {
                                 const images = getImageUrls(post.images);
                                 return (
-                                    <div style={{ display: "flex" }}>
+                                    <div style={{ display: "flex", marginTop: "28px" }}>
                                         <div
                                             key={post.id}
                                             onClick={() => navigate(`/post/${post.id}`)}

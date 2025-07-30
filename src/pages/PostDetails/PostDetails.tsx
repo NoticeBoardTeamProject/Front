@@ -464,7 +464,11 @@ const PostDetails: React.FC = () => {
                                     {!isAuthor && role && (
                                         <div style={{ display: "flex", gap: "28px" }}>
                                             <Button
-                                                onClick={() => navigate(`/chat/${post.userId}?postId=${post.id}`)}
+                                                onClick={() =>
+                                                    navigate('/profile', {
+                                                        state: { tab: 'chat', userId: post.userId, postId: post.id }
+                                                    })
+                                                }
                                                 style={{
                                                     height: '41px',
                                                     padding: "0px 18px",

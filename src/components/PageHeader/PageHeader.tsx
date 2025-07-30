@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, /*useEffect, useState*/ } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./PageHeader.css";
 
@@ -7,6 +7,7 @@ import { Navbar, Nav, Button } from "react-bootstrap";
 import Logo from "../../assets/icons/Logo.svg?react";
 import UserIcon from "../../assets/icons/UserIcon.svg?react";
 
+/*
 function parseJwt(token: string) {
   try {
     const base64Payload = token.split('.')[1];
@@ -16,10 +17,12 @@ function parseJwt(token: string) {
     return null;
   }
 }
+  */
 
 const PageHeader: FC = () => {
   const navigate = useNavigate();
 
+  /*
   const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
@@ -47,6 +50,7 @@ const PageHeader: FC = () => {
       });
     };
   }, []);
+  */
 
   return (
     <Navbar
@@ -74,26 +78,6 @@ const PageHeader: FC = () => {
           >
             NOTICES
           </Nav.Link>
-
-          {(role?.toLowerCase() === "admin" || role?.toLowerCase() === "owner") && (
-            <Nav.Link
-              as={Link}
-              to={"/admin-panel"}
-              style={{ padding: "0px 22px" }}
-            >
-              ADMIN PANEL
-            </Nav.Link>
-          )}
-
-          {role?.toLowerCase() === "owner" && (
-            <Nav.Link
-              as={Link}
-              to={"/owner-panel"}
-              style={{ padding: "0px 22px" }}
-            >
-              OWNER PANEL
-            </Nav.Link>
-          )}
         </div>
       </Nav>
       <Nav style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
