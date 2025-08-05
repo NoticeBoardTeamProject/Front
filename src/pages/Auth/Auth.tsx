@@ -8,7 +8,7 @@ import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFaceSadTear, faFaceLaugh } from "@fortawesome/free-solid-svg-icons";
 
-import PageWrapper from "../../components/PageWrapper/PageWrapper";
+import PageWrapper from "../../components/PageWrapper";
 
 const AuthPage: React.FC = () => {
     const navigate = useNavigate();

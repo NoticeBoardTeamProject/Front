@@ -12,7 +12,7 @@ import {
     faMagnifyingGlass,
     faUnlock
 } from "@fortawesome/free-solid-svg-icons";
-import PageWrapper from "../../components/PageWrapper/PageWrapper";
+import PageWrapper from "../../components/PageWrapper";
 
 interface BlockedUser {
     id: number;

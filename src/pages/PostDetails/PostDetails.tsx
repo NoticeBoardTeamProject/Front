@@ -6,9 +6,9 @@ import { Carousel } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShare, faHammer } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
-import PageWrapper from "../../components/PageWrapper/PageWrapper";
+import PageWrapper from "../../components/PageWrapper";
 
-import UserIcon from "../../assets/icons/UserIcon.svg?react";
+import AvatarPlaceholder from "../../assets/icons/AvatarPlaceholder.svg?react";
 import ButtonRight from "../../assets/icons/ButtonRight.svg?react";
 import HollowStar from "../../assets/icons/HollowStar.svg?react";
 import FullStar from "../../assets/icons/FullStar.svg?react";
@@ -330,13 +330,13 @@ const PostDetails: React.FC = () => {
                             </div>
                         )}
                         <div
-                            className="noise-overlay"
                             style={{
                                 flex: "1",
                                 padding: "28px",
                                 display: "flex",
                                 flexDirection: "column",
-                                justifyContent: "space-between"
+                                justifyContent: "space-between",
+                                backgroundColor: "#0D0D0D"
                             }}
                         >
                             <div>
@@ -389,37 +389,36 @@ const PostDetails: React.FC = () => {
                             </div>
                             <div
                                 style={{
-                                    color: "#F2F2F2"
+                                    color: "#F2F2F2",
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "flex-end"
                                 }}
                             >
-                                <p>
-                                    Contact seller
-                                </p>
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        justifyContent: "space-between",
-                                        alignItems: "flex-end",
-                                        marginTop: "8px"
-                                    }}
-                                >
-                                    <div style={{
-                                        display: "flex",
-                                        alignItems: "center"
-                                    }}>
-                                        <div
-                                            className="hexagon"
-                                            style={{
-                                                width: "80px",
-                                                height: "80px",
-                                                backgroundColor: "#D9A441",
-                                                overflow: "hidden",
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "center",
-                                            }}
-                                        >
-                                            {post.user.avatarBase64 ? (
+                                <div>
+                                    <p>
+                                        Contact seller
+                                    </p>
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            marginTop: "8px"
+                                        }}
+                                    >
+                                        {post.user.avatarBase64 ? (
+                                            <div
+                                                className="hexagon"
+                                                style={{
+                                                    width: "90px",
+                                                    height: "90px",
+                                                    backgroundColor: "#D9A441",
+                                                    overflow: "hidden",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                }}
+                                            >
                                                 <img
                                                     src={
                                                         post.user.avatarBase64.startsWith("data:")
@@ -434,17 +433,10 @@ const PostDetails: React.FC = () => {
                                                         borderRadius: 0,
                                                     }}
                                                 />
-                                            ) : (
-                                                <UserIcon
-                                                    style={{
-                                                        width: "50%",
-                                                        height: "50%",
-                                                        marginBottom: "0.5rem",
-                                                    }}
-                                                    aria-label="Default user icon"
-                                                />
-                                            )}
-                                        </div>
+                                            </div>
+                                        ) : (
+                                            <AvatarPlaceholder width={90} height={90} />
+                                        )}
                                         <div style={{ marginLeft: "8px" }}>
                                             <p>{post.user.name} {post.user.surname}</p>
                                             <p style={{ fontSize: "80%" }}>{post.user.email}</p>
@@ -461,48 +453,48 @@ const PostDetails: React.FC = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    {!isAuthor && role && (
-                                        <div style={{ display: "flex", gap: "28px" }}>
-                                            <Button
-                                                onClick={() =>
-                                                    navigate('/profile', {
-                                                        state: { tab: 'chat', userId: post.userId, postId: post.id }
-                                                    })
-                                                }
-                                                style={{
-                                                    height: '41px',
-                                                    padding: "0px 18px",
-                                                    borderRadius: '4px',
-                                                    backgroundColor: "#D9A441",
-                                                    border: "none",
-                                                    boxShadow: 'inset 0 0 8px rgba(0, 0, 0, 0.3)',
-                                                }}
-                                            >
-                                                Chat
-                                            </Button>
-
-                                            <Button
-                                                style={{
-                                                    height: '41px',
-                                                    padding: "0px 18px",
-                                                    borderRadius: '4px',
-                                                    backgroundColor: "#D9A441",
-                                                    border: "none",
-                                                    boxShadow: 'inset 0 0 8px rgba(0, 0, 0, 0.3)',
-                                                }}
-                                                onClick={() => {
-                                                    if (role === "admin" || role === "owner") {
-                                                        openBlockModal();
-                                                    } else {
-                                                        openReportModal("user");
-                                                    }
-                                                }}
-                                            >
-                                                {role === "owner" || role === "admin" ? "Ban" : "Report"}
-                                            </Button>
-                                        </div>
-                                    )}
                                 </div>
+                                {!isAuthor && role && (
+                                    <div style={{ display: "flex", gap: "28px" }}>
+                                        <Button
+                                            onClick={() =>
+                                                navigate('/profile', {
+                                                    state: { tab: 'chat', userId: post.userId, postId: post.id }
+                                                })
+                                            }
+                                            style={{
+                                                height: '41px',
+                                                padding: "0px 18px",
+                                                borderRadius: '4px',
+                                                backgroundColor: "#D9A441",
+                                                border: "none",
+                                                boxShadow: 'inset 0 0 8px rgba(0, 0, 0, 0.3)',
+                                            }}
+                                        >
+                                            Chat
+                                        </Button>
+
+                                        <Button
+                                            style={{
+                                                height: '41px',
+                                                padding: "0px 18px",
+                                                borderRadius: '4px',
+                                                backgroundColor: "#D9A441",
+                                                border: "none",
+                                                boxShadow: 'inset 0 0 8px rgba(0, 0, 0, 0.3)',
+                                            }}
+                                            onClick={() => {
+                                                if (role === "admin" || role === "owner") {
+                                                    openBlockModal();
+                                                } else {
+                                                    openReportModal("user");
+                                                }
+                                            }}
+                                        >
+                                            {role === "owner" || role === "admin" ? "Ban" : "Report"}
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

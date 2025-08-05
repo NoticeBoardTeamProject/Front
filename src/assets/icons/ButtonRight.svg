@@ -1,44 +1,5 @@
 <svg width="64" height="69" viewBox="0 0 64 69" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g filter="url(#filter0_iin_0_1)">
 <path d="M6.48366 56.2443C2.98813 54.5133 0.818061 50.9079 0.924929 47.0088L1.60114 22.3366C1.69397 18.9495 3.4956 15.8399 6.38779 14.0747L26.9793 1.50731C30.1108 -0.403928 34.0375 -0.446962 37.2101 1.39519L58.0825 13.5144C61.1645 15.3039 63.0612 18.5984 63.0612 22.1623L63.0612 46.9925C63.0612 50.6394 61.0759 53.9971 57.8805 55.7546L37.6382 66.8881C34.7711 68.4651 31.3138 68.5395 28.3814 67.0875L6.48366 56.2443Z" fill="#D9A441"/>
-</g>
 <path d="M42 35H22" stroke="#F2F2F2" strokeWidth="1.2"/>
 <path d="M36 29L42 35L36 41" stroke="#F2F2F2" strokeWidth="1.2"/>
-<defs>
-<filter id="filter0_iin_0_1" x="-1.07812" y="-1.95679" width="66.1387" height="72.0828" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
-<feFlood flood-opacity="0" result="BackgroundImageFix"/>
-<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
-<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-<feOffset dx="2" dy="2"/>
-<feGaussianBlur stdDeviation="2.5"/>
-<feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
-<feColorMatrix type="matrix" values="0 0 0 0 0.780449 0 0 0 0 0.508319 0 0 0 0 0 0 0 0 1 0"/>
-<feBlend mode="normal" in2="shape" result="effect1_innerShadow_0_1"/>
-<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-<feOffset dx="-2" dy="-2"/>
-<feGaussianBlur stdDeviation="2.5"/>
-<feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
-<feColorMatrix type="matrix" values="0 0 0 0 0.677885 0 0 0 0 0.451517 0 0 0 0 0.0286799 0 0 0 1 0"/>
-<feBlend mode="normal" in2="effect1_innerShadow_0_1" result="effect2_innerShadow_0_1"/>
-<feTurbulence type="fractalNoise" baseFrequency="10 10" stitchTiles="stitch" numOctaves="3" result="noise" seed="1755" />
-<feColorMatrix in="noise" type="luminanceToAlpha" result="alphaNoise" />
-<feComponentTransfer in="alphaNoise" result="coloredNoise1">
-<feFuncA type="discrete" tableValues="0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 "/>
-</feComponentTransfer>
-<feComposite operator="in" in2="effect2_innerShadow_0_1" in="coloredNoise1" result="noise1Clipped" />
-<feComponentTransfer in="alphaNoise" result="coloredNoise2">
-<feFuncA type="discrete" tableValues="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 "/>
-</feComponentTransfer>
-<feComposite operator="in" in2="effect2_innerShadow_0_1" in="coloredNoise2" result="noise2Clipped" />
-<feFlood floodColors="rgba(0, 0, 0, 0.25)" result="color1Flood" />
-<feComposite operator="in" in2="noise1Clipped" in="color1Flood" result="color1" />
-<feFlood floodColors="rgba(255, 255, 255, 0.25)" result="color2Flood" />
-<feComposite operator="in" in2="noise2Clipped" in="color2Flood" result="color2" />
-<feMerge result="effect3_noise_0_1">
-<feMergeNode in="effect2_innerShadow_0_1" />
-<feMergeNode in="color1" />
-<feMergeNode in="color2" />
-</feMerge>
-</filter>
-</defs>
 </svg>

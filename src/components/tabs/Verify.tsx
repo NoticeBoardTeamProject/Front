@@ -1,8 +1,9 @@
 import React, { useState, } from "react";
 import { Form, Button, Alert, Carousel } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash, faChevronLeft, faChevronRight, faCheck, faImage } from "@fortawesome/free-solid-svg-icons";
-import PageWrapper from "../../components/PageWrapper/PageWrapper";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
+
+import ButtonRight from "../../assets/icons/ButtonRight.svg?react";
 
 const Verify: React.FC = () => {
     const [images, setImages] = useState<File[]>([]);
@@ -82,9 +83,17 @@ const Verify: React.FC = () => {
     };
 
     return (
-        <PageWrapper>
-            <Form onSubmit={handleSubmit} style={{ width: "340px" }}>
-                <Form.Label>Upload photos that confirm your identity.</Form.Label>
+        <div>
+            <Form
+                onSubmit={handleSubmit}
+                style={{
+                    width: "400px",
+                    backgroundColor: "#0D0D0D",
+                    padding: "28px 40px"
+                }}
+            >
+                <Form.Label>Please upload a photo where you are holding or standing next to the item you want to post.</Form.Label>
+                <Form.Label>We use this to confirm that the person and item are real.</Form.Label>
                 <Form.Group className="mb-3">
                     <Form.Control
                         type="file"
@@ -100,13 +109,20 @@ const Verify: React.FC = () => {
                             activeIndex={activeIndex}
                             onSelect={(selectedIndex) => setActiveIndex(selectedIndex)}
                             prevIcon={
-                                <span style={{ color: "rgb(23, 25, 27)", fontSize: "2rem" }}>
-                                    <FontAwesomeIcon icon={faChevronLeft} />
+                                <span
+                                    style={{
+                                        transform: "scaleX(-1)"
+                                    }}
+                                >
+                                    <ButtonRight width={60} height={60} />
                                 </span>
                             }
                             nextIcon={
-                                <span style={{ color: "rgb(23, 25, 27)", fontSize: "2rem" }}>
-                                    <FontAwesomeIcon icon={faChevronRight} />
+                                <span style={{
+                                    position: "relative",
+                                    left: "20px"
+                                }}>
+                                    <ButtonRight width={60} height={60} />
                                 </span>
                             }
                         >
@@ -160,20 +176,24 @@ const Verify: React.FC = () => {
 
                 {error && <Alert variant="danger" style={{ marginTop: "1rem" }}>{error}</Alert>}
                 {success && <Alert variant="success" style={{ marginTop: "1rem" }}>{success}</Alert>}
-
-                <Button
-                    type="submit"
-                    disabled={loading || images.length == 0}
-                    variant="success"
-                    style={{
-                        width: "100%",
-                        marginTop: "1rem"
-                    }}
-                >
-                    {loading ? "Submitting..." : images.length==0 ? <><FontAwesomeIcon icon={faImage} /> Attach at least one photo!</> : <><FontAwesomeIcon icon={faCheck} /> Submit Request</>}
-                </Button>
             </Form>
-        </PageWrapper>
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "center"
+                }}
+            >
+                <Button
+                    disabled={loading || images.length == 0}
+                    style={{
+                        marginTop: "12px"
+                    }}
+                    onClick={handleSubmit}
+                >
+                    {loading ? "Submitting..." : images.length == 0 ? "Attach at least one photo!" : "Submit Request"}
+                </Button>
+            </div>
+        </div>
     );
 };
 

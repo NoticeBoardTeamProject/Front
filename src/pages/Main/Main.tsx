@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Spinner, Form, Button } from "react-bootstrap";
 import axios from "axios";
-import PageWrapper from "../../components/PageWrapper/PageWrapper";
+import PageWrapper from "../../components/PageWrapper";
 import Select from "react-select";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+
+import Search from "../../assets/icons/Search.svg?react";
 
 interface Post {
     id: number;
@@ -36,8 +38,11 @@ const Main: React.FC = () => {
     const [maxPrice, setMaxPrice] = useState<string>("");
     const [categoryId, setCategoryId] = useState<string | null>(null);
     const [title, setTitle] = useState<string>("");
+    const [activeTab, setActiveTab] = useState<string>('All');
 
     const API_URL = import.meta.env.VITE_API_URL;
+
+    const location = useLocation();
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -54,11 +59,16 @@ const Main: React.FC = () => {
         };
 
         fetchCategories();
-    }, [API_URL]);
+    }, []);
 
     useEffect(() => {
-        loadPosts();
-    }, [API_URL]);
+        if (location.state && location.state.title) {
+            setTitle(location.state.title);
+            handleSearch(location.state.title);
+        } else {
+            loadPosts();
+        }
+    }, [location.state]);
 
     const loadPosts = async () => {
         setLoading(true);
@@ -103,13 +113,16 @@ const Main: React.FC = () => {
         return `${day}.${month}.${year} at ${hours}:${minutes}`;
     };
 
-    const handleSearch = async () => {
+    const handleSearch = async (customTitle?: string) => {
         setLoading(true);
         try {
             const params: any = {};
-            if (title.trim()) params.title = title.trim();
+
+            const searchTitle = customTitle?.trim() || title.trim();
+            if (searchTitle) params.title = searchTitle;
             if (minPrice.trim()) params.min_price = Number(minPrice);
             if (maxPrice.trim()) params.max_price = Number(maxPrice);
+
             if (categoryId) {
                 const cat = categories.find((c) => c.value === Number(categoryId));
                 if (cat) params.category_name = cat.label;
@@ -131,6 +144,24 @@ const Main: React.FC = () => {
             }
         } finally {
             setLoading(false);
+        }
+    };
+
+    const getFilteredPosts = (): Post[] => {
+        switch (activeTab) {
+            case "Popular":
+                return [...posts]
+                    .sort((a, b) => b.views - a.views)
+            case "New":
+                return [...posts].sort(
+                    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                );
+            case "Cheapest":
+                return [...posts].sort((a, b) => a.price - b.price);
+            case "Expensive":
+                return [...posts].sort((a, b) => b.price - a.price);
+            default:
+                return posts;
         }
     };
 
@@ -258,47 +289,140 @@ const Main: React.FC = () => {
                             flex: "1"
                         }}
                     >
-                        <Button variant="success" onClick={handleSearch} disabled={loading}>
-                            {loading ? "Loading..." : "Search"}
+                        <Button onClick={() => handleSearch()} disabled={loading}>
+                            <Search width={22} height={22} />
                         </Button>
                         <Button
-                            variant="success"
-                            onClick={() => navigate("/create-notice")}
-                            disabled={loading}
+                            onClick={() =>
+                                navigate('/profile', {
+                                    state: { tab: 'create notice' }
+                                })
+                            }
+                            style={{
+                                height: '41px',
+                                padding: "0px 18px",
+                                borderRadius: '4px',
+                                backgroundColor: "#D9A441",
+                                border: "none",
+                                boxShadow: 'inset 0 0 8px rgba(0, 0, 0, 0.3)',
+                            }}
                         >
                             Create notice
                         </Button>
                     </div>
                 </Form>
+                <p
+                    style={{
+                        color: "#D9A441",
+                        width: "100%",
+                        margin: "28px 0"
+                    }}
+                >Found {getFilteredPosts().length} notice{getFilteredPosts().length > 1 && "s"}</p>
 
                 <div
                     style={{
+                        display: "flex",
                         width: "100%",
-                        paddingTop: "28px",
-                        color: "#F2F2F2"
+                        alignItems: "flex-end"
+                    }}
+                >
+                    <p
+                        style={{
+                            paddingRight: "14px",
+                            color: "white",
+                            fontSize: "120%",
+                            textTransform: "uppercase"
+                        }}
+                    >
+                        Notices
+                    </p>
+                    <div
+                        style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            flex: "1"
+                        }}
+                    >
+                        <div style={{ display: "flex", gap: "28px" }}>
+                            {["All", "Popular", "New", "Cheapest", "Expensive"].map((tab) => (
+                                <div
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab)}
+                                    style={{
+                                        color: activeTab === tab ? "#D9A441" : "#525252",
+                                        cursor: "pointer",
+                                        position: "relative",
+                                        transition: "color 0.2s",
+                                        padding: "0 6px 2px 6px"
+                                    }}
+                                >
+                                    {tab}
+                                    {activeTab === tab && (
+                                        <div
+                                            style={{
+                                                position: "absolute",
+                                                bottom: 0,
+                                                left: 0,
+                                                height: "1px",
+                                                width: "100%",
+                                                backgroundColor: "#E9E9E9",
+                                                transition: "all 0.3s ease-in-out",
+                                            }}
+                                        />
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                        <div
+                            style={{
+                                height: "1px",
+                                backgroundColor: "#525252"
+                            }}
+                        />
+                    </div>
+                </div>
+                <div
+                    style={{
+                        width: "100%",
+                        color: "#F2F2F2",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center"
                     }}
                 >
                     {loading ? (
                         <Spinner animation="border" />
                     ) : posts.length === 0 ? (
-                        <p style={{ color: "rgb(137, 143, 150)" }}>No posts found.</p>
+                        <p
+                            style={{
+                                marginTop: "28px"
+                            }}
+                        >No notices found.</p>
                     ) : (
-                        <div>
-                            {posts.map((post) => {
+                        <div
+                            style={{
+                                width: "100%"
+                            }}
+                        >
+                            {getFilteredPosts().map((post) => {
                                 const images = getImageUrls(post.images);
                                 return (
-                                    <div style={{ display: "flex", marginTop: "28px" }}>
+                                    <div
+                                        onClick={() => navigate(`/post/${post.id}`)}
+                                        style={{
+                                            display: "flex",
+                                            marginTop: "28px",
+                                            cursor: "pointer"
+                                        }}
+                                    >
                                         <div
                                             key={post.id}
-                                            onClick={() => navigate(`/post/${post.id}`)}
-                                            className="noise-overlay"
                                             style={{
                                                 backgroundColor: "#0D0D0D",
                                                 color: "white",
                                                 marginBottom: "16px",
                                                 width: "100%",
                                                 display: "flex",
-                                                cursor: "pointer",
                                                 transition: "background-color 0.2s",
                                             }}
                                             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#1a1a1a")}
@@ -392,7 +516,7 @@ const Main: React.FC = () => {
                                                 width: 0,
                                                 height: 0,
                                                 borderLeft: '120px solid transparent',
-                                                borderBottom: '100px solid #0D0D0D',
+                                                borderBottom: '100px solid #101211',
                                                 zIndex: "100",
                                                 position: "absolute",
                                                 top: "140px",
