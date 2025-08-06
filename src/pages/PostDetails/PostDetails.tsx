@@ -312,11 +312,19 @@ const PostDetails: React.FC = () => {
                         style={{
                             display: "flex",
                             gap: "40px",
-                            width: "100%"
+                            width: "100%",
+                            alignItems: "flex-start"
                         }}
                     >
                         {images.length > 0 && (
-                            <div style={{ position: "relative" }}>
+                            <div
+                                style={{
+                                    flexShrink: 0,
+                                    width: "100%",
+                                    maxWidth: "40%",
+                                    position: "relative",
+                                }}
+                            >
                                 <Carousel
                                     activeIndex={activeIndex}
                                     onSelect={(selectedIndex) => setActiveIndex(selectedIndex)}
@@ -338,7 +346,7 @@ const PostDetails: React.FC = () => {
                                             <div
                                                 style={{
                                                     width: "100%",
-                                                    height: "350px",
+                                                    height: "100%",
                                                     backgroundColor: "#000",
                                                     display: "flex",
                                                     justifyContent: "center",

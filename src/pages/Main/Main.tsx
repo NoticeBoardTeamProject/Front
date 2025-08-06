@@ -85,7 +85,7 @@ const Main: React.FC = () => {
     const [activeTab, setActiveTab] = useState<string>('All');
 
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const postsPerPage = 10;
+    const postsPerPage = 6;
 
     const API_URL = import.meta.env.VITE_API_URL;
 
@@ -181,6 +181,8 @@ const Main: React.FC = () => {
             }));
 
             setPosts(postsWithSerializedImages);
+
+            setCurrentPage(1);
         } catch (error: any) {
             if (axios.isAxiosError(error) && error.response?.status === 404) {
                 setPosts([]);
@@ -480,20 +482,23 @@ const Main: React.FC = () => {
                                                 marginBottom: "16px",
                                                 width: "100%",
                                                 display: "flex",
+                                                height: "240px",
                                                 transition: "background-color 0.2s",
                                             }}
                                             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#1a1a1a")}
                                             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#0D0D0D")}
                                         >
-                                            <img
-                                                src={images[0]}
-                                                style={{
-                                                    objectFit: "cover",
-                                                    height: "240px",
-                                                    width: "300px"
-                                                }}
-                                                alt={post.title}
-                                            />
+                                            {images.length > 0 && (
+                                                <img
+                                                    src={images[0]}
+                                                    style={{
+                                                        objectFit: "cover",
+                                                        height: "240px",
+                                                        width: "300px"
+                                                    }}
+                                                    alt={post.title}
+                                                />
+                                            )}
                                             <div
                                                 style={{
                                                     width: "100%",
@@ -525,10 +530,11 @@ const Main: React.FC = () => {
                                                                 marginBottom: "8px",
                                                                 fontWeight: "lighter",
                                                                 fontSize: "90%",
+                                                                width: "600px",
                                                                 color: "#d7d7d7"
                                                             }}
                                                         >
-                                                            {post.caption.length > 100 ? post.caption.slice(0, 100) + "..." : post.caption}
+                                                            {post.caption.length > 300 ? post.caption.slice(0, 100) + "..." : post.caption}
                                                         </p>
                                                     </div>
                                                     <p

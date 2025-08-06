@@ -11,7 +11,7 @@ import PostDetails from "./pages/PostDetails/PostDetails";
 function App() {
   return (
     <PageWrapper>
-      <Router>
+      <Router basename="/Front">
         <EaseOutWrapper
           show={true}
           duration={800}
