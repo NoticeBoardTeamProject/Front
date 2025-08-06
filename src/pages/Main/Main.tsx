@@ -7,6 +7,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 import Search from "../../assets/icons/Search.svg?react";
 
+import ButtonRight from "../../assets/icons/ButtonRight.svg?react";
+
 interface Post {
     id: number;
     title: string;
@@ -26,8 +28,50 @@ interface CategoryOption {
     label: string;
 }
 
+type PageButtonProps = {
+    page: number;
+    currentPage: number;
+    setCurrentPage: (page: number) => void;
+};
+
+const PageButton: React.FC<PageButtonProps> = ({ page, currentPage, setCurrentPage }) => (
+    <button
+        onClick={() => setCurrentPage(page)}
+        style={{
+            width: "40px",
+            height: "40px",
+            backgroundColor: page === currentPage ? "#D9A441" : "#0D0D0D",
+            color: "white",
+            border: page === currentPage ? "none" : "2px solid #D9A441",
+            borderRadius: "8px",
+            fontWeight: "bold",
+            cursor: "pointer"
+        }}
+    >
+        {page}
+    </button>
+);
+
+const Dots = () => (
+    <span
+        style={{
+            width: "40px",
+            height: "40px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "white",
+            border: "2px solid #D9A441",
+            borderRadius: "8px"
+        }}
+    >
+        ...
+    </span>
+);
+
 const Main: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
 
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
@@ -40,9 +84,10 @@ const Main: React.FC = () => {
     const [title, setTitle] = useState<string>("");
     const [activeTab, setActiveTab] = useState<string>('All');
 
-    const API_URL = import.meta.env.VITE_API_URL;
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const postsPerPage = 10;
 
-    const location = useLocation();
+    const API_URL = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -165,6 +210,13 @@ const Main: React.FC = () => {
         }
     };
 
+    const filteredPosts = getFilteredPosts();
+    const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+    const currentPosts = filteredPosts.slice(
+        (currentPage - 1) * postsPerPage,
+        currentPage * postsPerPage
+    );
+
     return (
         <PageWrapper>
             <>
@@ -183,7 +235,10 @@ const Main: React.FC = () => {
                                     color: "black",
                                     border: "3px solid #D9A441",
                                     boxShadow: "inset 0 0 12px rgba(0, 0, 0, 0.4)",
-                                    fontWeight: "600"
+                                    fontWeight: "600",
+                                    "&:hover": {
+                                        borderColor: "#D9A441",
+                                    },
                                 }),
                                 valueContainer: (base) => ({
                                     ...base,
@@ -191,14 +246,14 @@ const Main: React.FC = () => {
                                 }),
                                 indicatorSeparator: () => ({
                                     display: "none",
+                                    backgroundColor: "#D9A441",
                                 }),
                                 indicatorsContainer: (base) => ({
                                     ...base,
-                                    boxShadow: "inset 1px 0 0 rgb(63, 68, 74)",
+                                    borderLeft: "2px solid #D9A441",
                                 }),
                                 dropdownIndicator: (base) => ({
                                     ...base,
-                                    color: "rgb(137, 143, 150)",
                                 }),
                                 input: (base) => ({
                                     ...base,
@@ -209,19 +264,21 @@ const Main: React.FC = () => {
                                     ...base,
                                     backgroundColor: "#F2F2F2",
                                     zIndex: 10,
+                                    border: "3px solid #D9A441",
+                                    boxShadow: "inset 0 0 12px rgba(0, 0, 0, 0.4)",
                                 }),
                                 option: (base) => ({
                                     ...base,
-                                    backgroundColor: "#F2F2F2",
-                                    color: "white",
+                                    color: "#0D0D0D",
                                     cursor: "pointer",
                                     height: "29.25px",
                                     display: "flex",
                                     alignItems: "center",
+                                    fontWeight: "bold"
                                 }),
                                 singleValue: (base) => ({
                                     ...base,
-                                    color: "white",
+                                    color: "#0D0D0D",
                                 }),
                             }}
                             theme={(theme) => ({
@@ -404,7 +461,7 @@ const Main: React.FC = () => {
                                 width: "100%"
                             }}
                         >
-                            {getFilteredPosts().map((post) => {
+                            {currentPosts.map((post) => {
                                 const images = getImageUrls(post.images);
                                 return (
                                     <div
@@ -526,6 +583,81 @@ const Main: React.FC = () => {
                                     </div>
                                 );
                             })}
+                            {totalPages > 1 && (
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        marginTop: "28px",
+                                        gap: "16px"
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: 'space-between',
+                                            width: "440px"
+                                        }}
+                                    >
+                                        <button
+                                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                            disabled={currentPage === 1}
+                                            style={{
+                                                background: "none",
+                                                border: "none",
+                                                cursor: currentPage === 1 ? "default" : "pointer",
+                                                padding: 0,
+                                                display: "flex",
+                                                alignItems: "center",
+                                            }}
+                                        >
+                                            <ButtonRight
+                                                width={50}
+                                                height={50}
+                                                style={{ transform: "scaleX(-1)" }}
+                                            />
+                                        </button>
+
+                                        <div style={{ display: "flex", gap: "8px" }}>
+                                            <PageButton page={1} currentPage={currentPage} setCurrentPage={setCurrentPage} />
+
+                                            {currentPage > 3 && <Dots />}
+
+                                            {currentPage > 2 && (
+                                                <PageButton page={currentPage - 1} currentPage={currentPage} setCurrentPage={setCurrentPage} />
+                                            )}
+
+                                            {currentPage !== 1 && currentPage !== totalPages && (
+                                                <PageButton page={currentPage} currentPage={currentPage} setCurrentPage={setCurrentPage} />
+                                            )}
+
+                                            {currentPage < totalPages - 1 && (
+                                                <PageButton page={currentPage + 1} currentPage={currentPage} setCurrentPage={setCurrentPage} />
+                                            )}
+
+                                            {currentPage < totalPages - 2 && <Dots />}
+
+                                            {totalPages > 1 && <PageButton page={totalPages} currentPage={currentPage} setCurrentPage={setCurrentPage} />}
+                                        </div>
+
+                                        <button
+                                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                            disabled={currentPage === totalPages}
+                                            style={{
+                                                background: "none",
+                                                border: "none",
+                                                cursor: currentPage === totalPages ? "default" : "pointer",
+                                                padding: 0,
+                                                display: "flex",
+                                                alignItems: "center",
+                                            }}
+                                        >
+                                            <ButtonRight width={50} height={50} />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>

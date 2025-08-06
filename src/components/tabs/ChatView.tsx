@@ -155,7 +155,15 @@ const ChatView: React.FC = () => {
                 minHeight: "560px"
             }}
         >
-            <div style={{ width: "360px" }}>
+            <div
+                style={{
+                    width: "360px",
+                    height: "560px",
+                    overflowY: "auto",
+                    scrollbarWidth: "none",
+                    msOverflowStyle: "none",
+                }}
+            >
                 {dialogs.length === 0 ? (
                     <p
                         style={{

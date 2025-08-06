@@ -5,6 +5,8 @@ import axios from "axios";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 
+import ButtonRight from "../../assets/icons/ButtonRight.svg?react";
+
 interface Post {
     id: number;
     title: string;
@@ -19,6 +21,47 @@ interface Post {
     category_id: number;
 }
 
+type PageButtonProps = {
+    page: number;
+    currentPage: number;
+    setCurrentPage: (page: number) => void;
+};
+
+const PageButton: React.FC<PageButtonProps> = ({ page, currentPage, setCurrentPage }) => (
+    <button
+        onClick={() => setCurrentPage(page)}
+        style={{
+            width: "40px",
+            height: "40px",
+            backgroundColor: page === currentPage ? "#D9A441" : "#0D0D0D",
+            color: "white",
+            border: page === currentPage ? "none" : "2px solid #D9A441",
+            borderRadius: "8px",
+            fontWeight: "bold",
+            cursor: "pointer"
+        }}
+    >
+        {page}
+    </button>
+);
+
+const Dots = () => (
+    <span
+        style={{
+            width: "40px",
+            height: "40px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "white",
+            border: "2px solid #D9A441",
+            borderRadius: "8px"
+        }}
+    >
+        ...
+    </span>
+);
+
 const Notices: React.FC = () => {
     const navigate = useNavigate();
 
@@ -26,6 +69,9 @@ const Notices: React.FC = () => {
     const [loadingPosts, setLoadingPosts] = useState(false);
 
     const [activeTab, setActiveTab] = useState<string>('All');
+
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const postsPerPage = 6;
 
     const API_URL = import.meta.env.VITE_API_URL;
 
@@ -104,6 +150,13 @@ const Notices: React.FC = () => {
                 return posts;
         }
     };
+
+    const filteredPosts = getFilteredPosts();
+    const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+    const currentPosts = filteredPosts.slice(
+        (currentPage - 1) * postsPerPage,
+        currentPage * postsPerPage
+    );
 
     return (
         <div
@@ -185,121 +238,199 @@ const Notices: React.FC = () => {
                     }}
                 >You don't have any notices.</p>
             ) : (
-                getFilteredPosts().map((post) => {
-                    const images = getImageUrls(post.images);
-                    return (
-                        <div key={post.id} style={{ display: "flex", marginBottom: "28px" }}>
-                            <div
-                                onClick={() => navigate(`/post/${post.id}`)}
-                                key={post.id}
-                                style={{
-                                    backgroundColor: "#0D0D0D",
-                                    color: "white",
-                                    marginBottom: "16px",
-                                    width: "100%",
-                                    display: "flex",
-                                    transition: "background-color 0.2s",
-                                    cursor: "pointer"
-                                }}
-                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#1a1a1a")}
-                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#0D0D0D")}
-                            >
-                                <img
-                                    src={images[0]}
-                                    style={{ objectFit: "cover", height: "240px", width: "300px" }}
-                                    alt={post.title}
-                                />
+                <>
+                    {currentPosts.map((post) => {
+                        const images = getImageUrls(post.images);
+                        return (
+                            <div key={post.id} style={{ display: "flex", marginBottom: "28px" }}>
                                 <div
+                                    onClick={() => navigate(`/post/${post.id}`)}
+                                    key={post.id}
                                     style={{
+                                        backgroundColor: "#0D0D0D",
+                                        color: "white",
+                                        marginBottom: "16px",
                                         width: "100%",
                                         display: "flex",
-                                        flexDirection: "column",
-                                        justifyContent: "space-between",
-                                        padding: "28px",
+                                        transition: "background-color 0.2s",
+                                        cursor: "pointer"
                                     }}
+                                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#1a1a1a")}
+                                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#0D0D0D")}
                                 >
+                                    <img
+                                        src={images[0]}
+                                        style={{ objectFit: "cover", height: "240px", width: "300px" }}
+                                        alt={post.title}
+                                    />
                                     <div
                                         style={{
+                                            width: "100%",
                                             display: "flex",
+                                            flexDirection: "column",
                                             justifyContent: "space-between",
-                                            alignItems: "flex-start",
+                                            padding: "28px",
                                         }}
                                     >
-                                        <div>
-                                            <p
-                                                style={{
-                                                    fontWeight: "bold",
-                                                    textTransform: "uppercase",
-                                                    marginBottom: "12px",
-                                                }}
-                                            >
-                                                {post.title}
-                                            </p>
-                                            <p
-                                                style={{
-                                                    marginBottom: "8px",
-                                                    fontWeight: "lighter",
-                                                    fontSize: "90%",
-                                                    color: "#d7d7d7",
-                                                }}
-                                            >
-                                                {post.caption.length > 100
-                                                    ? post.caption.slice(0, 100) + "..."
-                                                    : post.caption}
-                                            </p>
-                                        </div>
-                                        <p
+                                        <div
                                             style={{
-                                                margin: 0,
-                                                fontWeight: "bold",
-                                                fontSize: "18px",
-                                                padding: "6px 18px",
-                                                borderRadius: "6px",
-                                                background:
-                                                    "linear-gradient(to bottom,#d9a441 0%,#c6a974 50%,#cc8d18 100%)",
-                                                color: "#0D0D0D",
-                                                boxShadow:
-                                                    "inset 2px 2px 5px #c78200, inset -2px -2px 5px #ad7307",
                                                 display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "center",
-                                                height: "41.32px",
+                                                justifyContent: "space-between",
+                                                alignItems: "flex-start",
                                             }}
                                         >
-                                            {post.price.toLocaleString("de-DE")}₴
-                                        </p>
+                                            <div>
+                                                <p
+                                                    style={{
+                                                        fontWeight: "bold",
+                                                        textTransform: "uppercase",
+                                                        marginBottom: "12px",
+                                                    }}
+                                                >
+                                                    {post.title}
+                                                </p>
+                                                <p
+                                                    style={{
+                                                        marginBottom: "8px",
+                                                        fontWeight: "lighter",
+                                                        fontSize: "90%",
+                                                        color: "#d7d7d7",
+                                                    }}
+                                                >
+                                                    {post.caption.length > 100
+                                                        ? post.caption.slice(0, 100) + "..."
+                                                        : post.caption}
+                                                </p>
+                                            </div>
+                                            <p
+                                                style={{
+                                                    margin: 0,
+                                                    fontWeight: "bold",
+                                                    fontSize: "18px",
+                                                    padding: "6px 18px",
+                                                    borderRadius: "6px",
+                                                    background:
+                                                        "linear-gradient(to bottom,#d9a441 0%,#c6a974 50%,#cc8d18 100%)",
+                                                    color: "#0D0D0D",
+                                                    boxShadow:
+                                                        "inset 2px 2px 5px #c78200, inset -2px -2px 5px #ad7307",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                    height: "41.32px",
+                                                }}
+                                            >
+                                                {post.price.toLocaleString("de-DE")}₴
+                                            </p>
+                                        </div>
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                fontSize: "80%",
+                                                color: "#a6a6a6",
+                                                paddingRight: "150px",
+                                            }}
+                                        >
+                                            <p>Published {formatDate(post.createdAt)}</p>
+                                            <div>Views: {post.views}</div>
+                                        </div>
                                     </div>
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: "space-between",
-                                            fontSize: "80%",
-                                            color: "#a6a6a6",
-                                            paddingRight: "150px",
-                                        }}
-                                    >
-                                        <p>Published {formatDate(post.createdAt)}</p>
-                                        <div>Views: {post.views}</div>
-                                    </div>
-                                </div>
-                                <div style={{
-                                    position: "relative"
-                                }}>
                                     <div style={{
-                                        width: 0,
-                                        height: 0,
-                                        borderLeft: '120px solid transparent',
-                                        borderBottom: '100px solid #101211',
-                                        zIndex: "100",
-                                        position: "absolute",
-                                        top: "140px",
-                                        left: "-120px"
-                                    }} />
+                                        position: "relative"
+                                    }}>
+                                        <div style={{
+                                            width: 0,
+                                            height: 0,
+                                            borderLeft: '120px solid transparent',
+                                            borderBottom: '100px solid #101211',
+                                            zIndex: "100",
+                                            position: "absolute",
+                                            top: "140px",
+                                            left: "-120px"
+                                        }} />
+                                    </div>
                                 </div>
                             </div>
+                        );
+                    })}
+                    {totalPages > 1 && (
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                marginTop: "28px",
+                                gap: "16px"
+                            }}
+                        >
+                            <div
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: 'space-between',
+                                    width: "440px"
+                                }}
+                            >
+                                <button
+                                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                    disabled={currentPage === 1}
+                                    style={{
+                                        background: "none",
+                                        border: "none",
+                                        cursor: currentPage === 1 ? "default" : "pointer",
+                                        padding: 0,
+                                        display: "flex",
+                                        alignItems: "center",
+                                    }}
+                                >
+                                    <ButtonRight
+                                        width={50}
+                                        height={50}
+                                        style={{ transform: "scaleX(-1)" }}
+                                    />
+                                </button>
+
+                                <div style={{ display: "flex", gap: "8px" }}>
+                                    <PageButton page={1} currentPage={currentPage} setCurrentPage={setCurrentPage} />
+
+                                    {currentPage > 3 && <Dots />}
+
+                                    {currentPage > 2 && (
+                                        <PageButton page={currentPage - 1} currentPage={currentPage} setCurrentPage={setCurrentPage} />
+                                    )}
+
+                                    {currentPage !== 1 && currentPage !== totalPages && (
+                                        <PageButton page={currentPage} currentPage={currentPage} setCurrentPage={setCurrentPage} />
+                                    )}
+
+                                    {currentPage < totalPages - 1 && (
+                                        <PageButton page={currentPage + 1} currentPage={currentPage} setCurrentPage={setCurrentPage} />
+                                    )}
+
+                                    {currentPage < totalPages - 2 && <Dots />}
+
+                                    {totalPages > 1 && <PageButton page={totalPages} currentPage={currentPage} setCurrentPage={setCurrentPage} />}
+                                </div>
+
+                                <button
+                                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                    disabled={currentPage === totalPages}
+                                    style={{
+                                        background: "none",
+                                        border: "none",
+                                        cursor: currentPage === totalPages ? "default" : "pointer",
+                                        padding: 0,
+                                        display: "flex",
+                                        alignItems: "center",
+                                    }}
+                                >
+                                    <ButtonRight width={50} height={50} />
+                                </button>
+                            </div>
                         </div>
-                    );
-                })
+                    )}
+                </>
+
             )}
         </div>
     );

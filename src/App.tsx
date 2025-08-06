@@ -7,7 +7,6 @@ import Main from "./pages/Main/Main"
 import PageWrapper from "./components/PageWrapper";
 import EaseOutWrapper from "./components/EaseOutWrapper/EaseOutWrapper";
 import PostDetails from "./pages/PostDetails/PostDetails";
-import AdminPanel from "./pages/AdminPanel/AdminPanel";
 
 function App() {
   return (
@@ -26,7 +25,6 @@ function App() {
           <Route path="/login" element={<Auth />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/post/:postId" element={<PostDetails />} />
-          <Route path="/admin-panel" element={<AdminPanel />} />
           <Route path="/" element={<Main />} />
         </Routes>
       </Router>

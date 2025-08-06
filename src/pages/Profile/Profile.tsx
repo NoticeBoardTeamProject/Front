@@ -16,6 +16,7 @@ import MyNotices from "../../components/tabs/MyNotices";
 import Settings from "../../components/tabs/Settings";
 import Verify from "../../components/tabs/Verify";
 import ChatView from "../../components/tabs/ChatView";
+import AdminPanel from "../../components/tabs/AdminPanel";
 
 interface UserData {
     id: number;
@@ -37,14 +38,14 @@ const ProfilePage: React.FC = () => {
     const [user, setUser] = useState<UserData | null>(null);
     const [loading, setLoading] = useState(true);
 
-    const [activeTab, setActiveTab] = useState<"my notices" | "chat" | "settings" | "create notice" | "verify">("my notices");
+    const [activeTab, setActiveTab] = useState<"my notices" | "chat" | "settings" | "create notice" | "verify" | "admin panel">("my notices");
 
     const API_URL = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
         if (location.state) {
             const { tab } = location.state as {
-                tab?: "my notices" | "chat" | "settings" | "create notice" | "verify"
+                tab?: "my notices" | "chat" | "settings" | "create notice" | "verify" | "admin panel"
             };
             if (tab) setActiveTab(tab);
         }
@@ -103,6 +104,7 @@ const ProfilePage: React.FC = () => {
         user?.isVerified
             ? { label: "CREATE NOTICE", key: "create notice" }
             : { label: "VERIFY", key: "verify" },
+        ...(user?.role === "Admin" ? [{ label: "ADMIN PANEL", key: "admin panel" }] : [])
     ];
 
     if (!user) return null;
@@ -172,7 +174,7 @@ const ProfilePage: React.FC = () => {
                     return (
                         <div
                             key={key}
-                            onClick={() => setActiveTab(key as "my notices" | "chat" | "settings")}
+                            onClick={() => setActiveTab(key as "my notices" | "chat" | "settings" | "create notice" | "verify" | "admin panel")}
                             style={{
                                 display: "flex",
                                 flexDirection: "column",
@@ -223,6 +225,9 @@ const ProfilePage: React.FC = () => {
             )}
             {activeTab === "verify" && (
                 <Verify />
+            )}
+            {activeTab === "admin panel" && (
+                <AdminPanel />
             )}
         </PageWrapper>
     );

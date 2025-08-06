@@ -3,8 +3,6 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { Spinner, Alert, Button, Modal, Form } from "react-bootstrap";
 import { Carousel } from "react-bootstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faShare, faHammer } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import PageWrapper from "../../components/PageWrapper";
 
@@ -69,6 +67,10 @@ const PostDetails: React.FC = () => {
     const [blockingUser, setBlockingUser] = useState(false);
     const [blockError, setBlockError] = useState<string | null>(null);
     const [blockSuccess, setBlockSuccess] = useState<string | null>(null);
+
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deletingPost, setDeletingPost] = useState(false);
+    const [deleteError, setDeleteError] = useState<string | null>(null);
 
     const [role, setRole] = useState<string | null>(null);
     const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -266,6 +268,36 @@ const PostDetails: React.FC = () => {
         }
     };
 
+    const handleDeletePost = () => {
+        setDeleteError(null);
+        setShowDeleteModal(true);
+    };
+
+    const confirmDeletePost = async () => {
+        if (!post) return;
+
+        setDeletingPost(true);
+        setDeleteError(null);
+
+        try {
+            await axios.delete(`${API_URL}/posts/${post.id}`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+            setShowDeleteModal(false);
+            navigate("/");
+        } catch (error: any) {
+            if (axios.isAxiosError(error)) {
+                setDeleteError(error.response?.data?.detail || "Failed to delete post");
+            } else {
+                setDeleteError("Failed to delete post");
+            }
+        } finally {
+            setDeletingPost(false);
+        }
+    };
+
     const isAuthor = userEmail === post.user.email;
 
     return (
@@ -454,85 +486,132 @@ const PostDetails: React.FC = () => {
                                         </div>
                                     </div>
                                 </div>
-                                {!isAuthor && role && (
-                                    <div style={{ display: "flex", gap: "28px" }}>
+                                <div style={{ display: "flex", gap: "12px" }}>
+                                    {isAuthor && (
                                         <Button
-                                            onClick={() =>
-                                                navigate('/profile', {
-                                                    state: { tab: 'chat', userId: post.userId, postId: post.id }
-                                                })
-                                            }
+                                            onClick={handleDeletePost}
                                             style={{
                                                 height: '41px',
                                                 padding: "0px 18px",
                                                 borderRadius: '4px',
                                                 backgroundColor: "#D9A441",
                                                 border: "none",
-                                                boxShadow: 'inset 0 0 8px rgba(0, 0, 0, 0.3)',
+                                                boxShadow: "inset 0 0 8px rgba(0, 0, 0, 0.3)"
                                             }}
                                         >
-                                            Chat
+                                            Delete
                                         </Button>
+                                    )}
 
-                                        <Button
-                                            style={{
-                                                height: '41px',
-                                                padding: "0px 18px",
-                                                borderRadius: '4px',
-                                                backgroundColor: "#D9A441",
-                                                border: "none",
-                                                boxShadow: 'inset 0 0 8px rgba(0, 0, 0, 0.3)',
-                                            }}
-                                            onClick={() => {
-                                                if (role === "admin" || role === "owner") {
-                                                    openBlockModal();
-                                                } else {
-                                                    openReportModal("user");
+                                    {!isAuthor && role && (
+                                        <>
+                                            <Button
+                                                onClick={() =>
+                                                    navigate('/profile', {
+                                                        state: { tab: 'chat', userId: post.userId, postId: post.id }
+                                                    })
                                                 }
-                                            }}
-                                        >
-                                            {role === "owner" || role === "admin" ? "Ban" : "Report"}
-                                        </Button>
-                                    </div>
-                                )}
+                                                style={{
+                                                    height: '41px',
+                                                    padding: "0px 18px",
+                                                    borderRadius: '4px',
+                                                    backgroundColor: "#D9A441",
+                                                    border: "none",
+                                                    boxShadow: 'inset 0 0 8px rgba(0, 0, 0, 0.3)',
+                                                }}
+                                            >
+                                                Chat
+                                            </Button>
+
+                                            {(role === "Admin" || role === "Owner") ? (
+                                                <>
+                                                    <Button
+                                                        onClick={openBlockModal}
+                                                        style={{
+                                                            height: '41px',
+                                                            padding: "0px 18px",
+                                                            borderRadius: '4px',
+                                                            backgroundColor: "#D9A441",
+                                                            border: "none",
+                                                            boxShadow: 'inset 0 0 8px rgba(0, 0, 0, 0.3)',
+                                                        }}
+                                                    >
+                                                        Ban
+                                                    </Button>
+
+                                                    <Button
+                                                        onClick={handleDeletePost}
+                                                        style={{
+                                                            height: '41px',
+                                                            padding: "0px 18px",
+                                                            borderRadius: '4px',
+                                                            backgroundColor: "#D9A441",
+                                                            border: "none",
+                                                            boxShadow: 'inset 0 0 8px rgba(0, 0, 0, 0.3)',
+                                                        }}
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </>
+                                            ) : (
+                                                <Button
+                                                    onClick={() => openReportModal("post")}
+                                                    style={{
+                                                        height: '41px',
+                                                        padding: "0px 18px",
+                                                        borderRadius: '4px',
+                                                        backgroundColor: "#D9A441",
+                                                        border: "none",
+                                                        boxShadow: 'inset 0 0 8px rgba(0, 0, 0, 0.3)',
+                                                    }}
+                                                >
+                                                    Report
+                                                </Button>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+
                             </div>
                         </div>
                     </div>
 
+                    {/* Send Report Modal */}
                     <Modal show={showReportModal} onHide={closeReportModal} centered>
-                        <Modal.Body style={{ backgroundColor: "rgb(33, 37, 41)", color: "white", borderRadius: "5.5px 5.5px 0 0" }} >
+                        <Modal.Body style={{ backgroundColor: "#0D0D0D", color: "white", borderRadius: "5.5px 5.5px 0 0" }} >
                             <Modal.Title>
                                 {reportType === "post" ? "Report Post" : "Report Seller"}
                             </Modal.Title>
                             {reportError && <Alert variant="danger">{reportError}</Alert>}
                             {reportSuccess && <Alert variant="success">{reportSuccess}</Alert>}
                             <Form.Group controlId="reportText">
-                                <Form.Label>Describe your complaint</Form.Label>
+                                <Form.Label style={{ color: "#a6a6a6" }}>Describe your complaint</Form.Label>
                                 <Form.Control
                                     as="textarea"
                                     rows={4}
                                     value={reportText}
-                                    style={{ backgroundColor: "rgb(23, 25, 27)", height: "80px" }}
+                                    style={{ backgroundColor: "#F2F2F2", height: "80px" }}
                                     onChange={(e) => setReportText(e.target.value)}
                                     disabled={sendingReport || !!reportSuccess}
                                 />
                             </Form.Group>
                         </Modal.Body>
-                        <Modal.Footer style={{ backgroundColor: "rgb(33, 37, 41)", color: "white", borderTop: "1px solid rgb(23, 25, 27)" }}>
+                        <Modal.Footer style={{ backgroundColor: "#0D0D0D", color: "white", borderTop: "1px solid rgb(23, 25, 27)" }}>
                             <Button
                                 variant="success"
                                 onClick={sendReport}
                                 disabled={sendingReport || !!reportSuccess}
                             >
-                                <FontAwesomeIcon icon={faShare} /> {sendingReport ? "Sending..." : "Send"}
+                                {sendingReport ? "Sending..." : "Send"}
                             </Button>
                         </Modal.Footer>
                     </Modal>
 
+                    {/* Block User Modal */}
                     <Modal show={showBlockModal} onHide={closeBlockModal} centered>
                         <Modal.Body
                             style={{
-                                backgroundColor: "rgb(33, 37, 41)",
+                                backgroundColor: "#0D0D0D",
                                 color: "white",
                                 borderRadius: "5.5px 5.5px 0 0",
                             }}
@@ -541,12 +620,12 @@ const PostDetails: React.FC = () => {
                             {blockError && <Alert variant="danger">{blockError}</Alert>}
                             {blockSuccess && <Alert variant="success">{blockSuccess}</Alert>}
                             <Form.Group controlId="blockReason">
-                                <Form.Label>Reason for blocking</Form.Label>
+                                <Form.Label style={{ color: "#a6a6a6" }}>Reason for blocking</Form.Label>
                                 <Form.Control
                                     as="textarea"
                                     rows={4}
                                     value={blockReason}
-                                    style={{ backgroundColor: "rgb(23, 25, 27)", height: "80px" }}
+                                    style={{ backgroundColor: "#F2F2F2", height: "80px" }}
                                     onChange={(e) => setBlockReason(e.target.value)}
                                     disabled={blockingUser || !!blockSuccess}
                                 />
@@ -554,7 +633,7 @@ const PostDetails: React.FC = () => {
                         </Modal.Body>
                         <Modal.Footer
                             style={{
-                                backgroundColor: "rgb(33, 37, 41)",
+                                backgroundColor: "#0D0D0D",
                                 color: "white",
                                 borderTop: "1px solid rgb(23, 25, 27)",
                             }}
@@ -564,8 +643,30 @@ const PostDetails: React.FC = () => {
                                 onClick={sendBlockUser}
                                 disabled={blockingUser || !!blockSuccess}
                             >
-                                <FontAwesomeIcon icon={faHammer} />{" "}
                                 {blockingUser ? "Blocking..." : "Block"}
+                            </Button>
+                        </Modal.Footer>
+                    </Modal>
+
+                    {/* Delete Post Modal */}
+                    <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
+                        <Modal.Body style={{ backgroundColor: "#0D0D0D", color: "white", borderRadius: "5.5px 5.5px 0 0" }}>
+                            <Modal.Title>Confirm Deletion</Modal.Title>
+                            <Form.Label style={{ color: "#a6a6a6" }}>Are you sure you want to delete this post?<br />This action cannot be undone.</Form.Label>
+                            {deleteError && <Alert variant="danger">{deleteError}</Alert>}
+                        </Modal.Body>
+                        <Modal.Footer
+                            style={{
+                                backgroundColor: "#0D0D0D",
+                                borderTop: "1px solid rgb(23, 25, 27)",
+                            }}
+                        >
+                            <Button
+                                variant="danger"
+                                onClick={confirmDeletePost}
+                                disabled={deletingPost}
+                            >
+                                {deletingPost ? "Deleting..." : "Delete"}
                             </Button>
                         </Modal.Footer>
                     </Modal>

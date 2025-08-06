@@ -171,57 +171,53 @@ const CreateNotice: React.FC = () => {
                                 control: (base) => ({
                                     ...base,
                                     backgroundColor: "#F2F2F2",
-                                    color: "#0D0D0D",
+                                    color: "black",
                                     border: "3px solid #D9A441",
                                     boxShadow: "inset 0 0 12px rgba(0, 0, 0, 0.4)",
-                                    fontWeight: 600,
-                                    cursor: "pointer",
-                                    minWidth: "180px"
+                                    fontWeight: "600",
+                                    "&:hover": {
+                                        borderColor: "#D9A441",
+                                    },
                                 }),
                                 valueContainer: (base) => ({
                                     ...base,
                                     padding: "0 8px",
-                                    color: "#0D0D0D",
                                 }),
                                 indicatorSeparator: () => ({
                                     display: "none",
+                                    backgroundColor: "#D9A441",
                                 }),
                                 indicatorsContainer: (base) => ({
                                     ...base,
-                                    boxShadow: "inset 1px 0 0 rgb(217, 164, 65)",
+                                    borderLeft: "2px solid #D9A441",
                                 }),
                                 dropdownIndicator: (base) => ({
                                     ...base,
-                                    color: "#D9A441",
-                                    cursor: "pointer",
                                 }),
                                 input: (base) => ({
                                     ...base,
                                     margin: 0,
                                     padding: 0,
-                                    color: "#0D0D0D",
-                                    fontWeight: 600,
                                 }),
                                 menu: (base) => ({
                                     ...base,
                                     backgroundColor: "#F2F2F2",
                                     zIndex: 10,
-                                    color: "#0D0D0D",
-                                    fontWeight: 600,
+                                    border: "3px solid #D9A441",
+                                    boxShadow: "inset 0 0 12px rgba(0, 0, 0, 0.4)",
                                 }),
-                                option: (base, state) => ({
+                                option: (base) => ({
                                     ...base,
-                                    backgroundColor: state.isFocused ? "#D9A441" : "#F2F2F2",
                                     color: "#0D0D0D",
                                     cursor: "pointer",
+                                    height: "29.25px",
                                     display: "flex",
                                     alignItems: "center",
-                                    fontWeight: 600,
+                                    fontWeight: "bold"
                                 }),
                                 singleValue: (base) => ({
                                     ...base,
                                     color: "#0D0D0D",
-                                    fontWeight: 600,
                                 }),
                             }}
                             theme={(theme) => ({
@@ -231,8 +227,6 @@ const CreateNotice: React.FC = () => {
                                     ...theme.colors,
                                     primary25: "#D9A441",
                                     primary: "#D9A441",
-                                    neutral0: "#F2F2F2",
-                                    neutral80: "#0D0D0D",
                                 },
                             })}
                         />
