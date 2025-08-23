@@ -8,6 +8,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Search from "../../assets/icons/Search.svg?react";
 
 import ButtonRight from "../../assets/icons/ButtonRight.svg?react";
+import { formatTime } from "../../utils/FormatTime";
 
 interface Post {
     id: number;
@@ -21,6 +22,9 @@ interface Post {
     createdAt: string;
     userId: number;
     category_id: number;
+    isUsed: boolean;
+    currency: string;
+    location: string;
 }
 
 interface CategoryOption {
@@ -145,17 +149,6 @@ const Main: React.FC = () => {
         } catch {
             return [];
         }
-    };
-
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        const day = String(date.getDate()).padStart(2, "0");
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const year = date.getFullYear();
-        const hours = String(date.getHours()).padStart(2, "0");
-        const minutes = String(date.getMinutes()).padStart(2, "0");
-
-        return `${day}.${month}.${year} at ${hours}:${minutes}`;
     };
 
     const handleSearch = async (customTitle?: string) => {
@@ -553,7 +546,7 @@ const Main: React.FC = () => {
                                                             height: '41.32px'
                                                         }}
                                                     >
-                                                        {post.price.toLocaleString("de-DE")}₴
+                                                        {post.price.toLocaleString("de-DE")}{post.currency == "UAH" ? "₴" : post.currency == "USD" ? "$" : "€"}
                                                     </p>
                                                 </div>
                                                 <div
@@ -565,10 +558,8 @@ const Main: React.FC = () => {
                                                         paddingRight: "150px"
                                                     }}
                                                 >
-                                                    <p>Published {formatDate(post.createdAt)}</p>
-                                                    <div>
-                                                        Views: {post.views}
-                                                    </div>
+                                                    <p>{post.location} - {formatTime(post.createdAt)}</p>
+                                                    <p> Views: {post.views}</p>
                                                 </div>
                                             </div>
                                         </div>

@@ -67,7 +67,7 @@ const ChatView: React.FC = () => {
 
             setDialogs(sortedDialogs);
 
-            if (sortedDialogs.length > 0 && !selectedChat) {
+            if (sortedDialogs.length > 0 && !selectedChat && !(location.state && (location.state as any).userId && (location.state as any).postId)) {
                 setSelectedChat({
                     userId: sortedDialogs[0].other_user.id,
                     postId: sortedDialogs[0].post.id,

@@ -65,6 +65,8 @@ const Settings: React.FC = () => {
                 }
             });
 
+            setEditedAvatar("");
+
             window.dispatchEvent(new Event("changedUsernameData"));
         } catch (err) {
             console.error("Failed to update profile", err);

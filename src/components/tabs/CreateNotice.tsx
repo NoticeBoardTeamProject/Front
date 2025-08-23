@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Form, Button, Spinner, Carousel, InputGroup } from "react-bootstrap";
+import { Form, Button, Spinner, Carousel } from "react-bootstrap";
 import Select from "react-select";
 import { useNavigate } from "react-router-dom";
 
@@ -22,9 +22,59 @@ const CreateNotice: React.FC = () => {
     const [tags, setTags] = useState("");
     const [categoryId, setCategoryId] = useState("0");
     const [categories, setCategories] = useState<{ value: number; label: string }[]>([]);
+    const [currency, setCurrency] = useState<"UAH" | "USD" | "EUR">("UAH");
     const [images, setImages] = useState<File[]>([]);
     const [loading, setLoading] = useState(false);
+    const [isUsed, setIsUsed] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
+
+    const currencyOptions = [
+        { value: "UAH", label: "₴" },
+        { value: "USD", label: "$" },
+        { value: "EUR", label: "€" },
+    ];
+
+    const [location, setLocation] = useState<string>("Dnipro, Dnipropetrovsk Oblast");
+
+    const cityOptions = [
+        { value: "Kyiv, Kyiv Oblast", label: "Kyiv, Kyiv Oblast" },
+        { value: "Kharkiv, Kharkiv Oblast", label: "Kharkiv, Kharkiv Oblast" },
+        { value: "Odesa, Odesa Oblast", label: "Odesa, Odesa Oblast" },
+        { value: "Dnipro, Dnipropetrovsk Oblast", label: "Dnipro, Dnipropetrovsk Oblast" },
+        { value: "Donetsk, Donetsk Oblast", label: "Donetsk, Donetsk Oblast" },
+        { value: "Zaporizhzhia, Zaporizhzhia Oblast", label: "Zaporizhzhia, Zaporizhzhia Oblast" },
+        { value: "Lviv, Lviv Oblast", label: "Lviv, Lviv Oblast" },
+        { value: "Kryvyi Rih, Dnipropetrovsk Oblast", label: "Kryvyi Rih, Dnipropetrovsk Oblast" },
+        { value: "Mykolaiv, Mykolaiv Oblast", label: "Mykolaiv, Mykolaiv Oblast" },
+        { value: "Mariupol, Donetsk Oblast", label: "Mariupol, Donetsk Oblast" },
+        { value: "Luhansk, Luhansk Oblast", label: "Luhansk, Luhansk Oblast" },
+        { value: "Vinnytsia, Vinnytsia Oblast", label: "Vinnytsia, Vinnytsia Oblast" },
+        { value: "Makiivka, Donetsk Oblast", label: "Makiivka, Donetsk Oblast" },
+        { value: "Sevastopol, Crimea", label: "Sevastopol, Crimea" },
+        { value: "Simferopol, Crimea", label: "Simferopol, Crimea" },
+        { value: "Kherson, Kherson Oblast", label: "Kherson, Kherson Oblast" },
+        { value: "Poltava, Poltava Oblast", label: "Poltava, Poltava Oblast" },
+        { value: "Chernihiv, Chernihiv Oblast", label: "Chernihiv, Chernihiv Oblast" },
+        { value: "Cherkasy, Cherkasy Oblast", label: "Cherkasy, Cherkasy Oblast" },
+        { value: "Sumy, Sumy Oblast", label: "Sumy, Sumy Oblast" },
+        { value: "Zhytomyr, Zhytomyr Oblast", label: "Zhytomyr, Zhytomyr Oblast" },
+        { value: "Horlivka, Donetsk Oblast", label: "Horlivka, Donetsk Oblast" },
+        { value: "Rivne, Rivne Oblast", label: "Rivne, Rivne Oblast" },
+        { value: "Kropyvnytskyi, Kirovohrad Oblast", label: "Kropyvnytskyi, Kirovohrad Oblast" },
+        { value: "Kamianske, Dnipropetrovsk Oblast", label: "Kamianske, Dnipropetrovsk Oblast" },
+        { value: "Chernivtsi, Chernivtsi Oblast", label: "Chernivtsi, Chernivtsi Oblast" },
+        { value: "Ternopil, Ternopil Oblast", label: "Ternopil, Ternopil Oblast" },
+        { value: "Ivano-Frankivsk, Ivano-Frankivsk Oblast", label: "Ivano-Frankivsk, Ivano-Frankivsk Oblast" },
+        { value: "Bila Tserkva, Kyiv Oblast", label: "Bila Tserkva, Kyiv Oblast" },
+        { value: "Melitopol, Zaporizhzhia Oblast", label: "Melitopol, Zaporizhzhia Oblast" },
+        { value: "Kerch, Crimea", label: "Kerch, Crimea" },
+        { value: "Sloviansk, Donetsk Oblast", label: "Sloviansk, Donetsk Oblast" },
+        { value: "Berdyansk, Zaporizhzhia Oblast", label: "Berdyansk, Zaporizhzhia Oblast" },
+        { value: "Uzhhorod, Zakarpattia Oblast", label: "Uzhhorod, Zakarpattia Oblast" },
+        { value: "Kramatorsk, Donetsk Oblast", label: "Kramatorsk, Donetsk Oblast" },
+        { value: "Nizhyn, Chernihiv Oblast", label: "Nizhyn, Chernihiv Oblast" },
+        { value: "Fastiv, Kyiv Oblast", label: "Fastiv, Kyiv Oblast" },
+    ];
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -68,6 +118,9 @@ const CreateNotice: React.FC = () => {
         formData.append("price", price);
         formData.append("tags", tags);
         formData.append("category_id", categoryId);
+        formData.append("currency", currency);
+        formData.append("location", location);
+        formData.append("isUsed", "false");
 
         images.forEach((img) => {
             formData.append("images", img);
@@ -89,6 +142,60 @@ const CreateNotice: React.FC = () => {
         }
     };
 
+    const selectStyles = {
+        control: (base: any) => ({
+            ...base,
+            backgroundColor: "#F2F2F2",
+            color: "black",
+            border: "3px solid #D9A441",
+            boxShadow: "inset 0 0 12px rgba(0, 0, 0, 0.4)",
+            fontWeight: "600",
+            "&:hover": {
+                borderColor: "#D9A441",
+            },
+        }),
+        valueContainer: (base: any) => ({
+            ...base,
+            padding: "0 8px",
+        }),
+        indicatorSeparator: () => ({
+            display: "none",
+            backgroundColor: "#D9A441",
+        }),
+        indicatorsContainer: (base: any) => ({
+            ...base,
+            borderLeft: "2px solid #D9A441",
+        }),
+        dropdownIndicator: (base: any) => ({
+            ...base,
+        }),
+        input: (base: any) => ({
+            ...base,
+            margin: 0,
+            padding: 0,
+        }),
+        menu: (base: any) => ({
+            ...base,
+            backgroundColor: "#F2F2F2",
+            zIndex: 10,
+            border: "3px solid #D9A441",
+            boxShadow: "inset 0 0 12px rgba(0, 0, 0, 0.4)",
+        }),
+        option: (base: any) => ({
+            ...base,
+            color: "#0D0D0D",
+            cursor: "pointer",
+            height: "29.25px",
+            display: "flex",
+            alignItems: "center",
+            fontWeight: "bold"
+        }),
+        singleValue: (base: any) => ({
+            ...base,
+            color: "#0D0D0D",
+        }),
+    };
+
     return (
         <div
             style={{
@@ -103,15 +210,12 @@ const CreateNotice: React.FC = () => {
                     backgroundColor: "#0D0D0D"
                 }}
             >
-                <div>
-                    <p
-                        style={{
-                            color: "white",
-                            margin: "0 0 8px 4px"
-                        }}
-                    >
-                        Enter title
-                    </p>
+                <div
+                    style={{
+                        color: "white",
+                    }}
+                >
+                    <p style={{ margin: "0 0 8px 4px" }}>Enter title</p>
                     <Form.Control
                         type="text"
                         placeholder="Enter new name"
@@ -128,31 +232,34 @@ const CreateNotice: React.FC = () => {
                 >
                     <Form.Group>
                         <Form.Label>Price</Form.Label>
-                        <InputGroup>
-                            <Form.Control
-                                type="number"
-                                min={0}
-                                value={price}
-                                onChange={(e) => setPrice(e.target.value)}
-                                required
-                                style={{
-                                    width: "140px"
-                                }}
-                                placeholder="Enter price"
-                            />
-                            <InputGroup.Text style={{
-                                width: "36px",
-                                display: "flex",
-                                justifyContent: "center",
-                                userSelect: "none",
-                                backgroundColor: "#F2F2F2",
-                                color: "#0D0D0D",
-                                border: "3px solid #D9A441",
-                                boxShadow: "inset 0 0 12px rgba(0, 0, 0, 0.4)",
-                                fontWeight: "600",
-                                borderLeft: "none"
-                            }}>₴</InputGroup.Text>
-                        </InputGroup>
+                        <Form.Control
+                            type="number"
+                            min={0}
+                            value={price}
+                            onChange={(e) => setPrice(e.target.value)}
+                            required
+                            style={{ width: "140px" }}
+                            placeholder="Enter price"
+                        />
+                    </Form.Group>
+                    <Form.Group>
+                        <Form.Label>Currency</Form.Label>
+                        <Select
+                            options={currencyOptions}
+                            value={currencyOptions.find(opt => opt.value === currency)}
+                            onChange={(opt) => setCurrency(opt?.value as "UAH" | "USD" | "EUR")}
+                            styles={selectStyles}
+                            theme={(theme) => ({
+                                ...theme,
+                                borderRadius: 4,
+                                colors: {
+                                    ...theme.colors,
+                                    primary25: "#D9A441",
+                                    primary: "#D9A441",
+                                },
+                            })}
+                            isSearchable={false}
+                        />
                     </Form.Group>
                     <Form.Group>
                         <Form.Label>Tags (comma-separated)</Form.Label>
@@ -167,59 +274,7 @@ const CreateNotice: React.FC = () => {
                         <Select
                             options={categories}
                             onChange={(selectedOption) => setCategoryId(String(selectedOption?.value))}
-                            styles={{
-                                control: (base) => ({
-                                    ...base,
-                                    backgroundColor: "#F2F2F2",
-                                    color: "black",
-                                    border: "3px solid #D9A441",
-                                    boxShadow: "inset 0 0 12px rgba(0, 0, 0, 0.4)",
-                                    fontWeight: "600",
-                                    "&:hover": {
-                                        borderColor: "#D9A441",
-                                    },
-                                }),
-                                valueContainer: (base) => ({
-                                    ...base,
-                                    padding: "0 8px",
-                                }),
-                                indicatorSeparator: () => ({
-                                    display: "none",
-                                    backgroundColor: "#D9A441",
-                                }),
-                                indicatorsContainer: (base) => ({
-                                    ...base,
-                                    borderLeft: "2px solid #D9A441",
-                                }),
-                                dropdownIndicator: (base) => ({
-                                    ...base,
-                                }),
-                                input: (base) => ({
-                                    ...base,
-                                    margin: 0,
-                                    padding: 0,
-                                }),
-                                menu: (base) => ({
-                                    ...base,
-                                    backgroundColor: "#F2F2F2",
-                                    zIndex: 10,
-                                    border: "3px solid #D9A441",
-                                    boxShadow: "inset 0 0 12px rgba(0, 0, 0, 0.4)",
-                                }),
-                                option: (base) => ({
-                                    ...base,
-                                    color: "#0D0D0D",
-                                    cursor: "pointer",
-                                    height: "29.25px",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    fontWeight: "bold"
-                                }),
-                                singleValue: (base) => ({
-                                    ...base,
-                                    color: "#0D0D0D",
-                                }),
-                            }}
+                            styles={selectStyles}
                             theme={(theme) => ({
                                 ...theme,
                                 borderRadius: 4,
@@ -229,6 +284,45 @@ const CreateNotice: React.FC = () => {
                                     primary: "#D9A441",
                                 },
                             })}
+                        />
+                    </Form.Group>
+                    <Form.Group style={{
+                        flex: "1"
+                    }}>
+                        <Form.Label>Location</Form.Label>
+                        <Select
+                            options={cityOptions}
+                            value={cityOptions.find(opt => opt.value === location)}
+                            onChange={(opt) => setLocation(opt?.value || "")}
+                            styles={selectStyles}
+                            isSearchable={true}
+                            isClearable={false}
+                            theme={(theme) => ({
+                                ...theme,
+                                borderRadius: 4,
+                                colors: {
+                                    ...theme.colors,
+                                    primary25: "#D9A441",
+                                    primary: "#D9A441",
+                                },
+                            })}
+                        />
+                    </Form.Group>
+
+
+                    <Form.Group>
+                        <Form.Label>Used</Form.Label>
+                        <Form.Check
+                            style={{
+                                width: "41.33px",
+                                height: "41.33px",
+                                margin: "0"
+                            }}
+                            type="checkbox"
+                            id="isUsed"
+                            checked={isUsed}
+                            onChange={(e) => setIsUsed(e.target.checked)}
+                            className="custom-checkbox"
                         />
                     </Form.Group>
                 </div>
