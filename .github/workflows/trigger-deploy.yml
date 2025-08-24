@@ -1,17 +1,29 @@
-name: Trigger Frontend Deploy
+name: Deploy Frontend
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  trigger-deploy:
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Trigger Deployment
-        run: |
-          curl -X POST \
-            -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/NoticeBoardTeamProject/Back/dispatches \
-            -d '{"event_type":"deploy-frontend"}'
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: SSH and deploy
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 22
+          script: |
+            cd /opt/app
+            git reset --hard
+            git pull origin main
+            docker-compose build frontend
+            docker-compose up -d frontend
+            docker-compose restart nginx
