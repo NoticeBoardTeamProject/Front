@@ -36,6 +36,6 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT }}
           script: |
-            cd /opt/app/frontend-build
+            cd /opt/app/Front
             rm -rf *
             cp -r /home/runner/work/Front/Front/dist/* ./
