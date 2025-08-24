@@ -23,19 +23,15 @@ jobs:
           script: |
             set -euxo pipefail
             
-            # Переходимо в директорію проекту
             cd /opt/app
             
-            # Оновлюємо код
             git pull origin main
             
-            # Встановлюємо залежності та будуємо фронтенд
             cd Front
             npm ci
             npm run build
             
-            # Перезапускаємо nginx
             cd /opt/app
             docker compose restart nginx
             
-            echo "✅ Frontend deployed successfully!"
+            echo "Frontend deployed successfully!"
