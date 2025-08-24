@@ -1,0 +1,17 @@
+name: Trigger Frontend Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  trigger-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Deployment
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.PAT_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/NoticeBoardTeamProject/Back/dispatches \
+            -d '{"event_type":"deploy-frontend"}'
