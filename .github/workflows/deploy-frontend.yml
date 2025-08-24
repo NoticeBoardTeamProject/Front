@@ -16,17 +16,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js (without caching)
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: Front/package-lock.json
+          # Видаляємо cache параметр
 
-      - name: Install dependencies and build
-        run: |
-          npm ci
-          npm run build
+      - name: Install dependencies
+        run: npm ci
+        working-directory: Front
+
+      - name: Build application
+        run: npm run build
         working-directory: Front
 
       - name: Deploy via SSH
@@ -39,18 +40,21 @@ jobs:
           script: |
             set -euxo pipefail
             
-            cd /opt/app
-            git pull origin main
+            cd /opt/app/Front
             
-            cd Front
-            npm ci
+            # Встановлюємо залежності без кешу
+            npm ci --no-audit --prefer-offline
+            
+            # Будуємо проект
             npm run build
             
+            # Копіюємо збірку
             sudo mkdir -p /opt/app/frontend-build
             sudo cp -r dist/* /opt/app/frontend-build/
             
+            # Перезапускаємо nginx
             cd /opt/app
-            docker compose restart nginx || docker compose up -d
+            docker compose restart nginx
             
-            echo "Deployment completed successfully!"
-            docker compose ps
+            echo "🚀 Deployment successful!"
+            echo "📦 Build files copied to /opt/app/frontend-build"
