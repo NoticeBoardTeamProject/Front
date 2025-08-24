@@ -38,4 +38,4 @@ jobs:
           script: |
             cd /opt/app/frontend-build
             rm -rf *
-            scp -r ./Front/dist/* ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/opt/app/frontend-build/
+            cp -r /home/runner/work/Front/Front/dist/* ./
