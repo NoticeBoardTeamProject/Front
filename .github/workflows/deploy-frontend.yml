@@ -1,29 +1,41 @@
-name: Deploy Frontend
+name: Frontend CI/CD
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
-  deploy-frontend:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: SSH and deploy frontend
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./Front
+
+      - name: Build frontend
+        run: npm run build
+        working-directory: ./Front
+
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          port: 22
+          port: ${{ secrets.SERVER_PORT }}
           script: |
-            cd /opt/app
-            git reset --hard
-            git pull origin main
-            docker-compose build frontend
-            docker-compose up -d frontend
-            docker-compose restart nginx
+            cd /opt/app/frontend-build
+            rm -rf *
+            scp -r ./Front/dist/* ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:/opt/app/frontend-build/
