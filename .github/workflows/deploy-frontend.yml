@@ -11,28 +11,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Клон репозиторію
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. Налаштовуємо Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
           cache: 'npm'
 
-      # 3. Встановлюємо залежності
       - name: Install dependencies
         run: npm ci
-        working-directory: ./Front
+        working-directory: Front
 
-      # 4. Build фронтенду
       - name: Build frontend
         run: npm run build
-        working-directory: ./Front
+        working-directory: Front
 
-      # 5. Деплой на сервер по SSH
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v0.1.7
         with:
@@ -41,9 +36,6 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT }}
           script: |
-            # Переходимо в папку на сервері
             cd /opt/app/frontend-build
-            # Очищуємо старий build
             rm -rf *
-            # Копіюємо новий build з workflow
             scp -r ./Front/dist/* ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/opt/app/frontend-build/
