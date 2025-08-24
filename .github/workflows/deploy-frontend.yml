@@ -32,6 +32,6 @@ jobs:
             npm run build
             
             cd /opt/app
-            docker compose restart nginx
+            docker-compose restart nginx
             
             echo "Frontend deployed successfully!"
