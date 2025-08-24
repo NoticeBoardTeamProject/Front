@@ -4,57 +4,46 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'Front/**'
   workflow_dispatch:
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
 
-      - name: Setup Node.js (without caching)
-        uses: actions/setup-node@v4
+    steps:
+      # 1. Клон репозиторію
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Налаштовуємо Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
           node-version: '20'
-          # Видаляємо cache параметр
+          cache: 'npm'
 
+      # 3. Встановлюємо залежності
       - name: Install dependencies
         run: npm ci
-        working-directory: Front
+        working-directory: ./Front
 
-      - name: Build application
+      # 4. Build фронтенду
+      - name: Build frontend
         run: npm run build
-        working-directory: Front
+        working-directory: ./Front
 
+      # 5. Деплой на сервер по SSH
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v0.1.7
         with:
-          host: ${{ secrets.SERVER_IP }}
+          host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT }}
           script: |
-            set -euxo pipefail
-            
-            cd /opt/app/Front
-            
-            # Встановлюємо залежності без кешу
-            npm ci --no-audit --prefer-offline
-            
-            # Будуємо проект
-            npm run build
-            
-            # Копіюємо збірку
-            sudo mkdir -p /opt/app/frontend-build
-            sudo cp -r dist/* /opt/app/frontend-build/
-            
-            # Перезапускаємо nginx
-            cd /opt/app
-            docker compose restart nginx
-            
-            echo "🚀 Deployment successful!"
-            echo "📦 Build files copied to /opt/app/frontend-build"
+            # Переходимо в папку на сервері
+            cd /opt/app/frontend-build
+            # Очищуємо старий build
+            rm -rf *
+            # Копіюємо новий build з workflow
+            scp -r ./Front/dist/* ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/opt/app/frontend-build/
