@@ -13,20 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies and build
-        run: |
-          cd Front
-          npm ci
-          npm run build
-        env:
-          VITE_API_URL: https://beez.pp.ua/api
-
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -41,9 +27,11 @@ jobs:
             
             git pull origin main
             
-            rsync -av --delete Front/dist/ /opt/app/Front/dist/
+            cd Front
+            npm ci
+            npm run build
             
             cd /opt/app
-            docker-compose restart frontend nginx
+            docker-compose restart nginx
             
             echo "Frontend deployed successfully!"
