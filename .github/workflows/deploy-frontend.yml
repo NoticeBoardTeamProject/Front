@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -29,13 +29,17 @@ jobs:
         working-directory: ./Front
 
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@v0.1.7
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT }}
           script: |
+            sudo mkdir -p /opt/app/frontend-build
+            sudo chown -R $USER:$USER /opt/app/frontend-build
+            
             cd /opt/app/frontend-build
-            rm -rf *
-            scp -r ./Front/dist/* ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:/opt/app/frontend-build/
+            rm -rf ./*
+            
+            mkdir -p /tmp/frontend-build
