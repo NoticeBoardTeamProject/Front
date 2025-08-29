@@ -386,7 +386,7 @@ const Main: React.FC = () => {
                             textTransform: "uppercase"
                         }}
                     >
-                        Notices1
+                        Notices
                     </p>
                     <div
                         style={{
