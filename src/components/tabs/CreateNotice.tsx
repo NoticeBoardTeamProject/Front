@@ -117,10 +117,10 @@ const CreateNotice: React.FC = () => {
         formData.append("caption", caption);
         formData.append("price", price);
         formData.append("tags", tags);
-        formData.append("category_id", categoryId);
+        formData.append("category_id", categoryId ? String(categoryId) : "0");
         formData.append("currency", currency);
         formData.append("location", location);
-        formData.append("isUsed", "false");
+        formData.append("isUsed", String(false));
 
         images.forEach((img) => {
             formData.append("images", img);
