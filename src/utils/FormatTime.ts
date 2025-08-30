@@ -1,4 +1,4 @@
-export function formatTime(dateInput: Date | string): string {
+export function formatDate(dateInput: Date | string): string {
     const date = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
     const now = new Date();
 

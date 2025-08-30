@@ -53,12 +53,14 @@ const Settings: React.FC = () => {
         try {
             const token = localStorage.getItem("token");
 
-            await axios.put(`${API_URL}/update-profile`, {
+            const payload = {
                 name: editedName,
                 surname: editedSurname,
                 phone: editedPhone,
                 avatarBase64: editedAvatar,
-            }, {
+            };
+
+            await axios.put(`${API_URL}/update-profile`, payload, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json"

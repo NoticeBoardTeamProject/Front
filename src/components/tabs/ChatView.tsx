@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Alert, Form, Button, InputGroup } from "react-bootstrap";
+import { Alert, Form, Button, InputGroup, Modal } from "react-bootstrap";
+import { useLocation } from "react-router-dom";
 
 import SentMessageIcon from "../../assets/icons/SentMessageIcon.svg?react";
 import AvatarPlaceholder from "../../assets/icons/AvatarPlaceholder.svg?react";
-
-import { useLocation } from "react-router-dom";
+import Review from "../../assets/icons/Review.svg?react";
+import HollowStar from "../../assets/icons/HollowStar.svg?react";
+import FullStar from "../../assets/icons/FullStar.svg?react";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -51,12 +53,16 @@ const ChatView: React.FC = () => {
     const [newMessage, setNewMessage] = useState("");
     const [error, setError] = useState<string | null>(null);
 
+    const [showReviewModal, setShowReviewModal] = useState(false);
+    const [reviewText, setReviewText] = useState("");
+    const [rating, setRating] = useState(3);
+
     const token = localStorage.getItem("token");
 
     const fetchChatList = async () => {
         try {
             const res = await axios.get<Dialogue[]>(`${API_URL}/chat/my`, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}` },
             });
 
             const sortedDialogs = res.data.sort((a, b) => {
@@ -67,13 +73,17 @@ const ChatView: React.FC = () => {
 
             setDialogs(sortedDialogs);
 
-            if (sortedDialogs.length > 0 && !selectedChat && !(location.state && (location.state as any).userId && (location.state as any).postId)) {
+            if (
+                sortedDialogs.length > 0 &&
+                !selectedChat &&
+                !(location.state && (location.state as any).userId && (location.state as any).postId)
+            ) {
                 setSelectedChat({
                     userId: sortedDialogs[0].other_user.id,
                     postId: sortedDialogs[0].post.id,
                 });
             }
-        } catch (err) {
+        } catch {
             setError("Failed to load chat list.");
         }
     };
@@ -91,7 +101,7 @@ const ChatView: React.FC = () => {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setDialogue(res.data);
-        } catch (err) {
+        } catch {
             setError("Failed to load chat.");
         }
     };
@@ -108,9 +118,7 @@ const ChatView: React.FC = () => {
                     message: newMessage,
                 },
                 {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                    headers: { Authorization: `Bearer ${token}` },
                 }
             );
 
@@ -129,9 +137,35 @@ const ChatView: React.FC = () => {
                     ],
                 });
             }
+
             setNewMessage("");
         } catch {
             alert("Failed to send message");
+        }
+    };
+
+    const sendReview = async () => {
+        if (!reviewText.trim() || rating === 0 || !selectedChat) return;
+
+        try {
+            const formData = new FormData();
+            formData.append("sellerId", String(selectedChat.userId));
+            formData.append("text", reviewText);
+            formData.append("rating", String(rating));
+
+            await axios.post(`${API_URL}/reviews`, formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+
+            setReviewText("");
+            setRating(0);
+            setShowReviewModal(false);
+        } catch (err: any) {
+            console.error(err.response?.data || err.message);
+            alert("Failed to submit review");
         }
     };
 
@@ -148,13 +182,8 @@ const ChatView: React.FC = () => {
     if (error) return <Alert variant="danger">{error}</Alert>;
 
     return (
-        <div
-            style={{
-                display: "flex",
-                gap: "12px",
-                minHeight: "560px"
-            }}
-        >
+        <div style={{ display: "flex", gap: "12px", minHeight: "560px" }}>
+            {/* Ліва колонка */}
             <div
                 style={{
                     width: "360px",
@@ -165,12 +194,7 @@ const ChatView: React.FC = () => {
                 }}
             >
                 {dialogs.length === 0 ? (
-                    <p
-                        style={{
-                            color: "white",
-                            textAlign: "center"
-                        }}
-                    >No chats found.</p>
+                    <p style={{ color: "white", textAlign: "center" }}>No chats found.</p>
                 ) : (
                     dialogs.map((dialog) => (
                         <div
@@ -179,7 +203,7 @@ const ChatView: React.FC = () => {
                                 color: "white",
                                 padding: "10px 15px",
                                 marginBottom: "16px",
-                                cursor: "pointer",
+                                cursor: dialog.post.title === "Deleted post" ? "not-allowed" : "pointer",
                                 display: "flex",
                                 alignItems: "center",
                                 backgroundColor: "#0D0D0D",
@@ -200,31 +224,29 @@ const ChatView: React.FC = () => {
                                         height: "58px",
                                         clipPath: "polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)",
                                         overflow: "hidden",
-                                        border: "2px solid #ccc"
+                                        border: "2px solid #ccc",
                                     }}
                                 >
                                     <img
                                         src={dialog.other_user.avatarBase64}
                                         alt="Avatar"
-                                        style={{
-                                            width: "100%",
-                                            height: "100%",
-                                            objectFit: "cover"
-                                        }}
+                                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
                                     />
                                 </div>
                             ) : (
                                 <AvatarPlaceholder width={60} height={60} />
                             )}
-                            <div style={{ flex: "1", marginLeft: "12px" }}>
+
+                            <div style={{ flex: 1, marginLeft: "12px" }}>
                                 <div style={{ display: "flex", justifyContent: "space-between" }}>
                                     <p style={{ color: "rgb(137, 143, 150)" }}>
-                                        <span style={{ fontWeight: "900", color: "white" }}>{dialog.other_user.nickname}</span>
+                                        <span style={{ fontWeight: 900, color: "white" }}>{dialog.other_user.nickname}</span>
                                     </p>
                                     <small style={{ color: "rgb(137, 143, 150)", fontSize: "0.75rem" }}>
                                         {dialog.last_message_time ? new Date(dialog.last_message_time).toLocaleString() : ""}
                                     </small>
                                 </div>
+
                                 <p style={{ fontStyle: "italic", color: "rgb(137, 143, 150)", marginTop: "6px" }}>
                                     {dialog.last_message && dialog.last_message.length > 100
                                         ? dialog.last_message.slice(0, 100) + "..."
@@ -236,6 +258,7 @@ const ChatView: React.FC = () => {
                 )}
             </div>
 
+            {/* Права колонка */}
             {selectedChat && dialogue && (
                 <div style={{ width: "480px" }}>
                     <div
@@ -243,20 +266,21 @@ const ChatView: React.FC = () => {
                             color: "rgb(137, 143, 150)",
                             padding: "12px",
                             marginBottom: "12px",
-                            backgroundColor: "#0D0D0D"
+                            backgroundColor: "#0D0D0D",
+                            display: "flex",
+                            justifyContent: "space-between",
                         }}
                     >
-                        Chat with <span style={{ fontWeight: "900", color: "white" }}>{dialogue.other_user.nickname}</span> about <span style={{ fontWeight: "900", color: "white" }}>{dialogue.post.title}</span>
+                        <p>
+                            Chat with <span style={{ fontWeight: 900, color: "white" }}>{dialogue.other_user.nickname}</span> about {" "}
+                            <span style={{ fontWeight: 900, color: "white" }}>{dialogue.post.title}</span>
+                        </p>
+                        <Button type="button" variant="success" onClick={() => setShowReviewModal(true)}>
+                            <Review width={22} height={22} />
+                        </Button>
                     </div>
 
-                    <div
-                        style={{
-                            height: "400px",
-                            overflowY: "auto",
-                            padding: "12px",
-                            backgroundColor: "#0D0D0D"
-                        }}
-                    >
+                    <div style={{ height: "400px", overflowY: "auto", padding: "12px", backgroundColor: "#0D0D0D" }}>
                         {dialogue.messages.map((msg) => (
                             <div
                                 key={msg.id}
@@ -265,7 +289,7 @@ const ChatView: React.FC = () => {
                                     marginBottom: "10px",
                                     display: "flex",
                                     alignItems: "center",
-                                    justifyContent: msg.user_id === dialogue.other_user.id ? "flex-start" : "flex-end"
+                                    justifyContent: msg.user_id === dialogue.other_user.id ? "flex-start" : "flex-end",
                                 }}
                             >
                                 {msg.user_id !== dialogue.other_user.id && (
@@ -281,7 +305,7 @@ const ChatView: React.FC = () => {
                                         borderRadius: "6px",
                                         maxWidth: "70%",
                                         color: msg.user_id === dialogue.other_user.id ? "#0D0D0D" : "white",
-                                        border: msg.user_id === dialogue.other_user.id ? "none" : "1.4px solid #D9A441"
+                                        border: msg.user_id === dialogue.other_user.id ? "none" : "1.4px solid #D9A441",
                                     }}
                                 >
                                     {msg.message}
@@ -302,23 +326,54 @@ const ChatView: React.FC = () => {
                                 sendMessage();
                             }}
                         >
-                            <div style={{ display: "flex", gap: "8px" }}>
-                                <InputGroup>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Type a message"
-                                        value={newMessage}
-                                        onChange={(e) => setNewMessage(e.target.value)}
-                                    />
-                                    <Button type="submit" variant="success">
-                                        <SentMessageIcon width={22} height={22} />
-                                    </Button>
-                                </InputGroup>
-                            </div>
+                            <InputGroup>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Type a message"
+                                    value={newMessage}
+                                    onChange={(e) => setNewMessage(e.target.value)}
+                                />
+                                <Button type="submit" variant="success">
+                                    <SentMessageIcon width={22} height={22} />
+                                </Button>
+                            </InputGroup>
                         </Form>
                     </div>
                 </div>
             )}
+
+            {/* Review Modal */}
+            <Modal show={showReviewModal} onHide={() => setShowReviewModal(false)} centered>
+                <Modal.Body style={{ backgroundColor: "#0D0D0D", color: "white", borderRadius: "5.5px 5.5px 0 0" }} >
+                    <Modal.Title>Leave a Review</Modal.Title>
+                    <p style={{ fontSize: "0.9rem", color: "rgb(180, 180, 180)", marginTop: "6px", marginBottom: "16px" }}>
+                        Your review helps other users understand how reliable and trustworthy this person is.
+                        Please share your experience and rate your communication.
+                    </p>
+                    <div style={{ display: "flex", marginBottom: "12px" }}>
+                        {[1, 2, 3, 4, 5].map((star) => (
+                            <div key={star} onClick={() => setRating(star)} style={{ cursor: "pointer" }}>
+                                {star <= rating ? <FullStar width={28} height={28} /> : <HollowStar width={28} height={28} />}
+                            </div>
+                        ))}
+                    </div>
+                    <Form.Control
+                        as="textarea"
+                        rows={3}
+                        placeholder="Write your review..."
+                        value={reviewText}
+                        onChange={(e) => setReviewText(e.target.value)}
+                    />
+                </Modal.Body>
+                <Modal.Footer style={{ backgroundColor: "#0D0D0D", color: "white", borderTop: "1px solid rgb(23, 25, 27)" }}>
+                    <Button variant="secondary" onClick={() => setShowReviewModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button variant="success" onClick={sendReview}>
+                        Submit Review
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

@@ -17,6 +17,7 @@ import Settings from "../../components/tabs/Settings";
 import Verify from "../../components/tabs/Verify";
 import ChatView from "../../components/tabs/ChatView";
 import AdminPanel from "../../components/tabs/AdminPanel";
+import Rating from "../../components/tabs/Rating";
 
 interface UserData {
     id: number;
@@ -38,14 +39,21 @@ const ProfilePage: React.FC = () => {
     const [user, setUser] = useState<UserData | null>(null);
     const [loading, setLoading] = useState(true);
 
-    const [activeTab, setActiveTab] = useState<"my notices" | "chat" | "settings" | "create notice" | "verify" | "admin panel">("my notices");
+    const [activeTab, setActiveTab] = useState<"my notices" | "chat" | "settings" | "create notice" | "verify" | "admin panel" | "rating">("my notices");
 
     const API_URL = import.meta.env.VITE_API_URL;
+
+    const token = localStorage.getItem("token");
+    useEffect(() => {
+        if (!token) {
+            navigate("/login");
+        }
+    }, [token, navigate]);
 
     useEffect(() => {
         if (location.state) {
             const { tab } = location.state as {
-                tab?: "my notices" | "chat" | "settings" | "create notice" | "verify" | "admin panel"
+                tab?: "my notices" | "chat" | "settings" | "create notice" | "verify" | "admin panel" | "rating"
             };
             if (tab) setActiveTab(tab);
         }
@@ -53,12 +61,7 @@ const ProfilePage: React.FC = () => {
 
     useEffect(() => {
         const fetchUser = async () => {
-            const token = localStorage.getItem("token");
-
-            if (!token) {
-                navigate("/login");
-                return;
-            }
+            if (!token) return;
 
             try {
                 const response = await axios.get(`${API_URL}/me`, {
@@ -87,7 +90,9 @@ const ProfilePage: React.FC = () => {
         return () => {
             window.removeEventListener("changedUsernameData", handleUsernameChange);
         };
-    }, [navigate]);
+    }, [navigate, token]);
+
+    if (!token) return null;
 
     if (loading) {
         return (
@@ -104,6 +109,7 @@ const ProfilePage: React.FC = () => {
         user?.isVerified
             ? { label: "CREATE NOTICE", key: "create notice" }
             : { label: "VERIFY", key: "verify" },
+        ...(user?.isVerified ? [{ label: "RATING", key: "rating" }] : []),
         ...(user?.role === "Admin" ? [{ label: "ADMIN PANEL", key: "admin panel" }] : [])
     ];
 
@@ -174,7 +180,7 @@ const ProfilePage: React.FC = () => {
                     return (
                         <div
                             key={key}
-                            onClick={() => setActiveTab(key as "my notices" | "chat" | "settings" | "create notice" | "verify" | "admin panel")}
+                            onClick={() => setActiveTab(key as "my notices" | "chat" | "settings" | "create notice" | "verify" | "admin panel" | "rating")}
                             style={{
                                 display: "flex",
                                 flexDirection: "column",
@@ -228,6 +234,9 @@ const ProfilePage: React.FC = () => {
             )}
             {activeTab === "admin panel" && (
                 <AdminPanel />
+            )}
+            {activeTab === "rating" && (
+                <Rating/>
             )}
         </PageWrapper>
     );

@@ -8,7 +8,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Search from "../../assets/icons/Search.svg?react";
 
 import ButtonRight from "../../assets/icons/ButtonRight.svg?react";
-import { formatTime } from "../../utils/FormatTime";
+import { formatDate } from "../../utils/FormatTime";
 
 interface Post {
     id: number;
@@ -461,6 +461,7 @@ const Main: React.FC = () => {
                                 return (
                                     <div
                                         onClick={() => navigate(`/post/${post.id}`)}
+                                        key={post.id}
                                         style={{
                                             display: "flex",
                                             marginTop: "28px",
@@ -558,7 +559,7 @@ const Main: React.FC = () => {
                                                         paddingRight: "150px"
                                                     }}
                                                 >
-                                                    <p>{post.location} - {formatTime(post.createdAt)}</p>
+                                                    <p>{post.location} - {formatDate(post.createdAt)}</p>
                                                     <p> Views: {post.views}</p>
                                                 </div>
                                             </div>

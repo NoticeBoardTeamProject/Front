@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import Select from "react-select";
 import axios from "axios";
 import { Spinner, Alert, Button, Modal, Form } from "react-bootstrap";
 import { Carousel } from "react-bootstrap";
@@ -10,7 +11,7 @@ import AvatarPlaceholder from "../../assets/icons/AvatarPlaceholder.svg?react";
 import ButtonRight from "../../assets/icons/ButtonRight.svg?react";
 import HollowStar from "../../assets/icons/HollowStar.svg?react";
 import FullStar from "../../assets/icons/FullStar.svg?react";
-import { formatTime } from "../../utils/FormatTime";
+import { formatDate } from "../../utils/FormatTime";
 
 interface User {
     id: number;
@@ -21,6 +22,7 @@ interface User {
     avatarBase64?: string | null;
     createdAt: string;
     rating: number;
+    reviewsCount: number;
 }
 
 interface Post {
@@ -56,7 +58,6 @@ const PostDetails: React.FC = () => {
     const { postId } = useParams<{ postId: string }>();
     const [post, setPost] = useState<Post | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [activeIndex, setActiveIndex] = useState(0);
 
     const [showReportModal, setShowReportModal] = useState(false);
@@ -79,23 +80,68 @@ const PostDetails: React.FC = () => {
     const [role, setRole] = useState<string | null>(null);
     const [userEmail, setUserEmail] = useState<string | null>(null);
 
+    const [showCloseModal, setShowCloseModal] = useState(false);
+    const [closeReason, setCloseReason] = useState<"sold" | "not_relevant" | "mistake" | "">("");
+    const [closingPost, setClosingPost] = useState(false);
+    const [closeError, setCloseError] = useState<string | null>(null);
+
     const API_URL = import.meta.env.VITE_API_URL;
+
+    const openCloseModal = () => {
+        setCloseReason("");
+        setCloseError(null);
+        setShowCloseModal(true);
+    };
+
+    const closeCloseModal = () => {
+        setShowCloseModal(false);
+    };
+
+    const sendClosePost = async () => {
+        if (!closeReason) {
+            setCloseError("Please select a reason");
+            return;
+        }
+
+        setClosingPost(true);
+        setCloseError(null);
+
+        const token = localStorage.getItem("token");
+        if (!token) {
+            setCloseError("You must be logged in");
+            setClosingPost(false);
+            return;
+        }
+
+        try {
+            await axios.post(`${API_URL}/posts/${post?.id}/close`,
+                new URLSearchParams({ reason: closeReason }),
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setPost(prev => prev ? { ...prev, isClosed: true, closeReason } : prev);
+            setShowCloseModal(false);
+        } catch (err: any) {
+            setCloseError(
+                axios.isAxiosError(err) && err.response?.data?.detail
+                    ? err.response.data.detail
+                    : "Failed to close post"
+            );
+        } finally {
+            setClosingPost(false);
+        }
+    };
 
     useEffect(() => {
         const fetchPost = async () => {
             try {
                 const res = await axios.get<Post>(`${API_URL}/posts/${postId}`);
+
                 setPost({
                     ...res.data,
                     images: JSON.stringify(res.data.images ?? []),
                 });
             } catch (err: any) {
-                if (axios.isAxiosError(err) && err.response?.status === 404) {
-                    setError("Post not found.");
-                } else {
-                    setError("Failed to load post.");
-                    console.error(err);
-                }
+                console.error(err);
             } finally {
                 setLoading(false);
             }
@@ -103,20 +149,6 @@ const PostDetails: React.FC = () => {
 
         if (postId) fetchPost();
     }, [postId, API_URL]);
-
-    const getImageUrls = (images: string): string[] => {
-        try {
-            const parsed = JSON.parse(images);
-            if (Array.isArray(parsed)) {
-                return parsed.map((img: string) =>
-                    img.startsWith("data:") ? img : `data:image/jpeg;base64,${img}`
-                );
-            }
-            return [];
-        } catch {
-            return [];
-        }
-    };
 
     const openReportModal = (type: "post" | "user") => {
         setReportType(type);
@@ -202,9 +234,24 @@ const PostDetails: React.FC = () => {
         }
     };
 
-    if (!post) return null;
+    const [isAuthor, setIsAuthor] = useState(false);
+    const [images, setImages] = useState<string[]>([]);
 
-    const images = getImageUrls(post.images);
+    useEffect(() => {
+        if (post) {
+            try {
+                const parsedImages = JSON.parse(post.images ?? "[]");
+                setImages(Array.isArray(parsedImages) ? parsedImages.map(img => img.startsWith("data:") ? img : `data:image/jpeg;base64,${img}`) : []);
+            } catch {
+                setImages([]);
+            }
+
+            setIsAuthor(userEmail === post.user.email);
+        } else {
+            setImages([]);
+            setIsAuthor(false);
+        }
+    }, [post, userEmail]);
 
     const openBlockModal = () => {
         setBlockReason("");
@@ -291,14 +338,25 @@ const PostDetails: React.FC = () => {
         }
     };
 
-    const isAuthor = userEmail === post.user.email;
+    const closeOptions = [
+        { value: "sold", label: "Sold" },
+        { value: "not_relevant", label: "Not relevant" },
+        { value: "mistake", label: "Mistake" },
+    ];
 
     return (
         <PageWrapper>
             {loading ? (
                 <Spinner animation="border" />
-            ) : error ? (
-                <Alert variant="danger">{error}</Alert>
+            ) : !post ? (
+                <p style={{
+                    color: "white",
+                    textAlign: "center",
+                    marginTop: "20px",
+                    fontSize: "1rem"
+                }}>
+                    The post has been deleted or does not exist.
+                </p>
             ) : (
                 <>
                     <div
@@ -381,7 +439,7 @@ const PostDetails: React.FC = () => {
                                         color: "#a6a6a6"
                                     }}
                                 >
-                                    <p>{post.location} - {formatTime(post.createdAt)}</p>
+                                    <p>{post.location} - {formatDate(post.createdAt)}</p>
                                     <div>
                                         Views: {post.views}
                                     </div>
@@ -470,19 +528,23 @@ const PostDetails: React.FC = () => {
                                         ) : (
                                             <AvatarPlaceholder width={90} height={90} />
                                         )}
+
                                         <div style={{ marginLeft: "8px" }}>
                                             <p>{post.user.name} {post.user.surname}</p>
                                             <p style={{ fontSize: "80%" }}>{post.user.email}</p>
-                                            <p style={{ fontSize: "80%" }}>{post.user.phone}</p>
-                                            <div style={{ display: "flex", gap: "4px", marginTop: "4px" }}>
-                                                {[...Array(5)].map((_, i) => {
-                                                    if (post.user.rating === undefined) {
-                                                        return <HollowStar key={i} width={20} height={20} />;
-                                                    }
-                                                    return i < post.user.rating
-                                                        ? <FullStar key={i} width={20} height={20} />
-                                                        : <HollowStar key={i} width={20} height={20} />;
-                                                })}
+                                            <p style={{ fontSize: "80%" }}>{post.user.phone || "No phone"}</p>
+
+                                            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "4px" }}>
+                                                <div style={{ display: "flex", gap: "4px" }}>
+                                                    {[...Array(5)].map((_, i) =>
+                                                        i < Math.round(post.user.rating)
+                                                            ? <FullStar key={i} width={20} height={20} />
+                                                            : <HollowStar key={i} width={20} height={20} />
+                                                    )}
+                                                </div>
+                                                <span style={{ fontSize: "0.85rem", color: "#a6a6a6", position: "relative", top: "2px" }}>
+                                                    ({post.user.reviewsCount ? post.user.reviewsCount : "0"})
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -490,7 +552,7 @@ const PostDetails: React.FC = () => {
                                 <div style={{ display: "flex", gap: "12px" }}>
                                     {isAuthor && (
                                         <Button
-                                            onClick={handleDeletePost}
+                                            onClick={openCloseModal}
                                             style={{
                                                 height: '41px',
                                                 padding: "0px 18px",
@@ -500,7 +562,7 @@ const PostDetails: React.FC = () => {
                                                 boxShadow: "inset 0 0 8px rgba(0, 0, 0, 0.3)"
                                             }}
                                         >
-                                            Delete
+                                            Close Post
                                         </Button>
                                     )}
 
@@ -671,9 +733,74 @@ const PostDetails: React.FC = () => {
                             </Button>
                         </Modal.Footer>
                     </Modal>
+
+                    {/* Close Post Modal */}
+                    <Modal show={showCloseModal} onHide={closeCloseModal} centered>
+                        <Modal.Body style={{ backgroundColor: "#0D0D0D", color: "white", borderRadius: "5.5px 5.5px 0 0" }}>
+                            <Modal.Title>Close Post</Modal.Title>
+                            {closeError && <Alert variant="danger">{closeError}</Alert>}
+                            <Form.Group controlId="closeReason">
+                                <Form.Label style={{ color: "#a6a6a6" }}>Select reason for closing</Form.Label>
+                                <Select
+                                    options={closeOptions}
+                                    onChange={(selectedOption) =>
+                                        setCloseReason(selectedOption ? (selectedOption.value as "sold" | "not_relevant" | "mistake") : "")
+                                    }
+                                    value={closeOptions.find((c) => c.value === closeReason) || null}
+                                    isClearable
+                                    styles={{
+                                        control: (base) => ({
+                                            ...base,
+                                            backgroundColor: "#F2F2F2",
+                                            color: "black",
+                                            border: "3px solid #D9A441",
+                                            boxShadow: "inset 0 0 12px rgba(0, 0, 0, 0.4)",
+                                            fontWeight: "600",
+                                            "&:hover": { borderColor: "#D9A441" },
+                                        }),
+                                        valueContainer: (base) => ({ ...base, padding: "0 8px" }),
+                                        indicatorSeparator: () => ({ display: "none" }),
+                                        indicatorsContainer: (base) => ({ ...base, borderLeft: "2px solid #D9A441" }),
+                                        dropdownIndicator: (base) => ({ ...base }),
+                                        input: (base) => ({ ...base, margin: 0, padding: 0 }),
+                                        menu: (base) => ({
+                                            ...base,
+                                            backgroundColor: "#F2F2F2",
+                                            zIndex: 10,
+                                            border: "3px solid #D9A441",
+                                            boxShadow: "inset 0 0 12px rgba(0, 0, 0, 0.4)",
+                                        }),
+                                        option: (base) => ({
+                                            ...base,
+                                            color: "#0D0D0D",
+                                            cursor: "pointer",
+                                            height: "29.25px",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            fontWeight: "bold",
+                                        }),
+                                        singleValue: (base) => ({ ...base, color: "#0D0D0D" }),
+                                    }}
+                                    theme={(theme) => ({
+                                        ...theme,
+                                        borderRadius: 4,
+                                        colors: { ...theme.colors, primary25: "#D9A441", primary: "#D9A441" },
+                                    })}
+                                />
+                            </Form.Group>
+                        </Modal.Body>
+                        <Modal.Footer style={{ backgroundColor: "#0D0D0D", color: "white", borderTop: "1px solid rgb(23, 25, 27)" }}>
+                            <Button
+                                variant="danger"
+                                onClick={sendClosePost}
+                                disabled={closingPost || !closeReason}
+                            >
+                                {closingPost ? "Closing..." : "Close Post"}
+                            </Button>
+                        </Modal.Footer>
+                    </Modal>
                 </>
-            )
-            }
+            )}
         </PageWrapper >
     );
 };

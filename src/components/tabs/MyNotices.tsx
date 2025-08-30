@@ -6,6 +6,7 @@ import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import ButtonRight from "../../assets/icons/ButtonRight.svg?react";
+import { formatDate } from "../../utils/FormatTime";
 
 interface Post {
     id: number;
@@ -18,6 +19,8 @@ interface Post {
     isPromoted: boolean;
     createdAt: string;
     userId: number;
+    isClosed: boolean;
+    closeReason: string;
     category_id: number;
 }
 
@@ -120,17 +123,6 @@ const Notices: React.FC = () => {
         } catch {
             return [];
         }
-    };
-
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        const day = String(date.getDate()).padStart(2, "0");
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const year = date.getFullYear();
-        const hours = String(date.getHours()).padStart(2, "0");
-        const minutes = String(date.getMinutes()).padStart(2, "0");
-
-        return `${day}.${month}.${year} at ${hours}:${minutes}`;
     };
 
     const getFilteredPosts = (): Post[] => {
@@ -244,7 +236,9 @@ const Notices: React.FC = () => {
                         return (
                             <div key={post.id} style={{ display: "flex", marginBottom: "28px" }}>
                                 <div
-                                    onClick={() => navigate(`/post/${post.id}`)}
+                                    onClick={() => {
+                                        if (!post.isClosed) navigate(`/post/${post.id}`);
+                                    }}
                                     key={post.id}
                                     style={{
                                         backgroundColor: "#0D0D0D",
@@ -253,10 +247,14 @@ const Notices: React.FC = () => {
                                         width: "100%",
                                         display: "flex",
                                         transition: "background-color 0.2s",
-                                        cursor: "pointer"
+                                        cursor: post.isClosed ? "default" : "pointer",
                                     }}
-                                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#1a1a1a")}
-                                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#0D0D0D")}
+                                    onMouseEnter={(e) => {
+                                        if (!post.isClosed) e.currentTarget.style.backgroundColor = "#1a1a1a";
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        if (!post.isClosed) e.currentTarget.style.backgroundColor = "#0D0D0D";
+                                    }}
                                 >
                                     <img
                                         src={images[0]}
@@ -288,6 +286,22 @@ const Notices: React.FC = () => {
                                                     }}
                                                 >
                                                     {post.title}
+                                                </p>
+                                                <p style={{ marginBottom: "12px", color: "#D9A441", fontWeight: "bold" }}>
+                                                    {post.isClosed && (
+                                                        <>
+                                                            <span style={{fontWeight: "normal"}}>This post was closed</span>
+                                                            {post.closeReason && (
+                                                                <>
+                                                                    :{" "}
+                                                                    {post.closeReason
+                                                                        .split("_")
+                                                                        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                                                                        .join(" ")}
+                                                                </>
+                                                            )}
+                                                        </>
+                                                    )}
                                                 </p>
                                                 <p
                                                     style={{
@@ -354,6 +368,7 @@ const Notices: React.FC = () => {
                             </div>
                         );
                     })}
+
                     {totalPages > 1 && (
                         <div
                             style={{
