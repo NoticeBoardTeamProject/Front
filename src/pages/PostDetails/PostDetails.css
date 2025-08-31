@@ -121,9 +121,6 @@
 /* Post Details Seller */
 .post-details-seller {
     color: #F2F2F2;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
     gap: 20px;
     padding-top: 16px;
 }
@@ -209,8 +206,8 @@
     display: flex;
     gap: 12px;
     flex-shrink: 0;
-    flex-wrap: wrap;
-    justify-content: flex-end;
+    justify-content: space-between;
+    margin-top: 12px;
 }
 
 .post-details-action-btn {
