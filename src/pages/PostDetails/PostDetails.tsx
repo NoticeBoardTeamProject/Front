@@ -5,7 +5,7 @@ import axios from "axios";
 import { Spinner, Alert, Button, Modal, Form } from "react-bootstrap";
 import { Carousel } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import PageWrapper from "../../components/PageWrapper";
+import "./PostDetails.css";
 
 import AvatarPlaceholder from "../../assets/icons/AvatarPlaceholder.svg?react";
 import ButtonRight from "../../assets/icons/ButtonRight.svg?react";
@@ -345,7 +345,7 @@ const PostDetails: React.FC = () => {
     ];
 
     return (
-        <PageWrapper>
+        <div>
             {loading ? (
                 <Spinner animation="border" />
             ) : !post ? (
@@ -359,60 +359,31 @@ const PostDetails: React.FC = () => {
                 </p>
             ) : (
                 <>
-                    <div
-                        style={{
-                            display: "flex",
-                            gap: "40px",
-                            width: "100%",
-                            alignItems: "flex-start"
-                        }}
-                    >
+                    <div className="post-details-content">
                         {images.length > 0 && (
-                            <div
-                                style={{
-                                    flexShrink: 0,
-                                    width: "100%",
-                                    maxWidth: "40%",
-                                    position: "relative",
-                                }}
-                            >
+                            <div className="post-details-images">
                                 <Carousel
                                     activeIndex={activeIndex}
                                     onSelect={(selectedIndex) => setActiveIndex(selectedIndex)}
                                     prevIcon={
-                                        <span style={{
-                                            transform: "scaleX(-1)"
-                                        }}>
-                                            <ButtonRight width={60} height={60} />
+                                        <span className="post-details-carousel-arrow prev">
+                                            <ButtonRight width={40} height={40} />
                                         </span>
                                     }
                                     nextIcon={
-                                        <span style={{ width: "24px", height: "24px", display: "inline-block" }}>
-                                            <ButtonRight width={60} height={60} />
+                                        <span className="post-details-carousel-arrow next">
+                                            <ButtonRight width={40} height={40} />
                                         </span>
                                     }
+                                    className="post-details-carousel"
                                 >
                                     {images.map((src, index) => (
                                         <Carousel.Item key={index}>
-                                            <div
-                                                style={{
-                                                    width: "100%",
-                                                    height: "100%",
-                                                    backgroundColor: "#000",
-                                                    display: "flex",
-                                                    justifyContent: "center",
-                                                    alignItems: "center",
-                                                    overflow: "hidden",
-                                                }}
-                                            >
+                                            <div className="post-details-image-container">
                                                 <img
                                                     src={src}
                                                     alt={`Image ${index + 1}`}
-                                                    style={{
-                                                        width: "100%",
-                                                        height: "100%",
-                                                        objectFit: "cover",
-                                                    }}
+                                                    className="post-details-image"
                                                 />
                                             </div>
                                         </Carousel.Item>
@@ -420,96 +391,29 @@ const PostDetails: React.FC = () => {
                                 </Carousel>
                             </div>
                         )}
-                        <div
-                            style={{
-                                flex: "1",
-                                padding: "28px",
-                                display: "flex",
-                                flexDirection: "column",
-                                justifyContent: "space-between",
-                                backgroundColor: "#0D0D0D"
-                            }}
-                        >
-                            <div>
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        justifyContent: "space-between",
-                                        fontSize: "80%",
-                                        color: "#a6a6a6"
-                                    }}
-                                >
-                                    <p>{post.location} - {formatDate(post.createdAt)}</p>
-                                    <div>
-                                        Views: {post.views}
-                                    </div>
-                                </div>
-                                <div style={{
-                                    color: "#F2F2F2",
-                                    marginTop: "12px"
-                                }}>
-                                    <p
-                                        style={{
-                                            fontWeight: "bold",
-                                            textTransform: "uppercase",
-                                            marginBottom: "6px"
-                                        }}
-                                    >
-                                        {post.title}
-                                    </p>
-                                    <p
-                                        style={{
-                                            marginBottom: "8px",
-                                            fontWeight: "lighter",
-                                            fontSize: "90%"
-                                        }}
-                                    >
-                                        {post.caption}
-                                    </p>
-                                </div>
-                                <p
-                                    style={{
-                                        color: "#D9A441",
-                                        fontWeight: "bold",
-                                        fontSize: "120%",
-                                        marginTop: "28px"
-                                    }}
-                                >
+
+                        <div className="post-details-info">
+                            <div className="post-details-meta">
+                                <p>{post.location} - {formatDate(post.createdAt)}</p>
+                                <div>Views: {post.views}</div>
+                            </div>
+
+                            <div className="post-details-main">
+                                <h1 className="post-details-title">{post.title}</h1>
+                                <p className="post-details-caption">{post.caption}</p>
+
+                                <p className="post-details-price">
                                     {post.price.toLocaleString("de-DE")}{post.currency == "UAH" ? "₴" : post.currency == "USD" ? "$" : "€"}
                                 </p>
                             </div>
-                            <div
-                                style={{
-                                    color: "#F2F2F2",
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    alignItems: "flex-end"
-                                }}
-                            >
-                                <div>
-                                    <p>
-                                        Contact seller
-                                    </p>
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            alignItems: "center",
-                                            marginTop: "8px"
-                                        }}
-                                    >
+
+                            <div className="post-details-seller">
+                                <div className="post-details-seller-info">
+                                    <p className="post-details-seller-label">Contact seller</p>
+
+                                    <div className="post-details-seller-details">
                                         {post.user.avatarBase64 ? (
-                                            <div
-                                                className="hexagon"
-                                                style={{
-                                                    width: "90px",
-                                                    height: "90px",
-                                                    backgroundColor: "#D9A441",
-                                                    overflow: "hidden",
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                    justifyContent: "center",
-                                                }}
-                                            >
+                                            <div className="post-details-seller-avatar">
                                                 <img
                                                     src={
                                                         post.user.avatarBase64.startsWith("data:")
@@ -517,51 +421,37 @@ const PostDetails: React.FC = () => {
                                                             : `data:image/jpeg;base64,${post.user.avatarBase64}`
                                                     }
                                                     alt={`${post.user.name} avatar`}
-                                                    style={{
-                                                        width: "100%",
-                                                        height: "100%",
-                                                        objectFit: "cover",
-                                                        borderRadius: 0,
-                                                    }}
+                                                    className="post-details-avatar-image"
                                                 />
                                             </div>
                                         ) : (
-                                            <AvatarPlaceholder width={90} height={90} />
+                                            <AvatarPlaceholder width={90} height={90} className="post-details-avatar-placeholder" />
                                         )}
 
-                                        <div style={{ marginLeft: "8px" }}>
-                                            <p>{post.user.name} {post.user.surname}</p>
-                                            <p style={{ fontSize: "80%" }}>{post.user.email}</p>
-                                            <p style={{ fontSize: "80%" }}>{post.user.phone || "No phone"}</p>
+                                        <div className="post-details-seller-data">
+                                            <p className="post-details-seller-name">{post.user.name} {post.user.surname}</p>
+                                            <p className="post-details-seller-email">{post.user.email}</p>
+                                            <p className="post-details-seller-phone">{post.user.phone || "No phone"}</p>
 
-                                            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "4px" }}>
-                                                <div style={{ display: "flex", gap: "4px" }}>
+                                            <div className="post-details-seller-rating">
+                                                <div className="post-details-stars">
                                                     {[...Array(5)].map((_, i) =>
                                                         i < Math.round(post.user.rating)
                                                             ? <FullStar key={i} width={20} height={20} />
                                                             : <HollowStar key={i} width={20} height={20} />
                                                     )}
                                                 </div>
-                                                <span style={{ fontSize: "0.85rem", color: "#a6a6a6", position: "relative", top: "2px" }}>
+                                                <span className="post-details-rating-count">
                                                     ({post.user.reviewsCount ? post.user.reviewsCount : "0"})
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div style={{ display: "flex", gap: "12px" }}>
+
+                                <div className="post-details-actions">
                                     {isAuthor && (
-                                        <Button
-                                            onClick={openCloseModal}
-                                            style={{
-                                                height: '41px',
-                                                padding: "0px 18px",
-                                                borderRadius: '4px',
-                                                backgroundColor: "#D9A441",
-                                                border: "none",
-                                                boxShadow: "inset 0 0 8px rgba(0, 0, 0, 0.3)"
-                                            }}
-                                        >
+                                        <Button onClick={openCloseModal} className="post-details-action-btn">
                                             Close Post
                                         </Button>
                                     )}
@@ -574,67 +464,29 @@ const PostDetails: React.FC = () => {
                                                         state: { tab: 'chat', userId: post.userId, postId: post.id }
                                                     })
                                                 }
-                                                style={{
-                                                    height: '41px',
-                                                    padding: "0px 18px",
-                                                    borderRadius: '4px',
-                                                    backgroundColor: "#D9A441",
-                                                    border: "none",
-                                                    boxShadow: 'inset 0 0 8px rgba(0, 0, 0, 0.3)',
-                                                }}
+                                                className="post-details-action-btn"
                                             >
                                                 Chat
                                             </Button>
 
                                             {(role === "Admin" || role === "Owner") ? (
                                                 <>
-                                                    <Button
-                                                        onClick={openBlockModal}
-                                                        style={{
-                                                            height: '41px',
-                                                            padding: "0px 18px",
-                                                            borderRadius: '4px',
-                                                            backgroundColor: "#D9A441",
-                                                            border: "none",
-                                                            boxShadow: 'inset 0 0 8px rgba(0, 0, 0, 0.3)',
-                                                        }}
-                                                    >
+                                                    <Button onClick={openBlockModal} className="post-details-action-btn">
                                                         Ban
                                                     </Button>
 
-                                                    <Button
-                                                        onClick={handleDeletePost}
-                                                        style={{
-                                                            height: '41px',
-                                                            padding: "0px 18px",
-                                                            borderRadius: '4px',
-                                                            backgroundColor: "#D9A441",
-                                                            border: "none",
-                                                            boxShadow: 'inset 0 0 8px rgba(0, 0, 0, 0.3)',
-                                                        }}
-                                                    >
+                                                    <Button onClick={handleDeletePost} className="post-details-action-btn">
                                                         Delete
                                                     </Button>
                                                 </>
                                             ) : (
-                                                <Button
-                                                    onClick={() => openReportModal("post")}
-                                                    style={{
-                                                        height: '41px',
-                                                        padding: "0px 18px",
-                                                        borderRadius: '4px',
-                                                        backgroundColor: "#D9A441",
-                                                        border: "none",
-                                                        boxShadow: 'inset 0 0 8px rgba(0, 0, 0, 0.3)',
-                                                    }}
-                                                >
+                                                <Button onClick={() => openReportModal("post")} className="post-details-action-btn">
                                                     Report
                                                 </Button>
                                             )}
                                         </>
                                     )}
                                 </div>
-
                             </div>
                         </div>
                     </div>
@@ -801,7 +653,7 @@ const PostDetails: React.FC = () => {
                     </Modal>
                 </>
             )}
-        </PageWrapper >
+        </div >
     );
 };
 

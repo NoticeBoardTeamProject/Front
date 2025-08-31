@@ -4,7 +4,7 @@ import VerificationRequests from "./VerificationRequests";
 import Complaints from "./Complaints";
 
 const AdminPanel: React.FC = () => {
-    const [activeTab, setActiveTab] = useState<"Users" | "Verification Requests" | "Complaints">("Users");
+    const [activeTab, setActiveTab] = useState<"Users" | "Verification" | "Complaints">("Users");
 
     return (
         <div style={{ width: "100%", color: "white" }}>
@@ -28,7 +28,7 @@ const AdminPanel: React.FC = () => {
                 </p>
                 <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
                     <div style={{ display: "flex", gap: "28px" }}>
-                        {["Users", "Verification Requests", "Complaints"].map((tab) => (
+                        {["Users", "Verification", "Complaints"].map((tab) => (
                             <div
                                 key={tab}
                                 onClick={() => setActiveTab(tab as any)}
@@ -62,7 +62,7 @@ const AdminPanel: React.FC = () => {
             </div>
 
             {activeTab === "Users" && <UsersWithPosts />}
-            {activeTab === "Verification Requests" && <VerificationRequests />}
+            {activeTab === "Verification" && <VerificationRequests />}
             {activeTab === "Complaints" && <Complaints />}
         </div>
     );

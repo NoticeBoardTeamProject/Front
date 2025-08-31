@@ -1,10 +1,10 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import PageHeader from "./components/PageHeader";
+import PageHeader from "./components/PageHeader/PageHeader";
 import Auth from "./pages/Auth/Auth"
 import Profile from "./pages/Profile/Profile"
 import Main from "./pages/Main/Main"
-import PageWrapper from "./components/PageWrapper";
+import PageWrapper from "./components/PageWrapper/PageWrapper";
 import EaseOutWrapper from "./components/EaseOutWrapper/EaseOutWrapper";
 import PostDetails from "./pages/PostDetails/PostDetails";
 

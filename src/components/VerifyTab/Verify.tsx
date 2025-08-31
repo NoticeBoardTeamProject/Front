@@ -2,6 +2,7 @@ import React, { useState, } from "react";
 import { Form, Button, Alert, Carousel } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import "./Verify.css";
 
 import ButtonRight from "../../assets/icons/ButtonRight.svg?react";
 
@@ -83,70 +84,54 @@ const Verify: React.FC = () => {
     };
 
     return (
-        <div>
+        <div className="verification-container">
             <Form
                 onSubmit={handleSubmit}
-                style={{
-                    width: "400px",
-                    backgroundColor: "#0D0D0D",
-                    padding: "28px 40px"
-                }}
+                className="verification-form"
             >
-                <Form.Label>Please upload a photo where you are holding or standing next to the item you want to post.</Form.Label>
-                <Form.Label>We use this to confirm that the person and item are real.</Form.Label>
-                <Form.Group className="mb-3">
+                <div className="verification-instructions">
+                    <Form.Label className="verification-label">
+                        Please upload a photo where you are holding or standing next to the item you want to post.
+                    </Form.Label>
+                    <Form.Label className="verification-label">
+                        We use this to confirm that the person and item are real.
+                    </Form.Label>
+                </div>
+
+                <Form.Group className="verification-upload-group">
                     <Form.Control
                         type="file"
                         multiple
                         accept="image/*"
                         onChange={handleImageChange}
+                        className="verification-file-input"
                     />
                 </Form.Group>
 
                 {images.length > 0 && (
-                    <div style={{ position: "relative" }}>
+                    <div className="verification-carousel-container">
                         <Carousel
                             activeIndex={activeIndex}
                             onSelect={(selectedIndex) => setActiveIndex(selectedIndex)}
                             prevIcon={
-                                <span
-                                    style={{
-                                        transform: "scaleX(-1)"
-                                    }}
-                                >
-                                    <ButtonRight width={60} height={60} />
+                                <span className="verification-carousel-arrow prev">
+                                    <ButtonRight width={40} height={40} />
                                 </span>
                             }
                             nextIcon={
-                                <span style={{
-                                    position: "relative",
-                                    left: "20px"
-                                }}>
-                                    <ButtonRight width={60} height={60} />
+                                <span className="verification-carousel-arrow next">
+                                    <ButtonRight width={40} height={40} />
                                 </span>
                             }
+                            className="verification-carousel"
                         >
                             {images.map((file, index) => (
                                 <Carousel.Item key={index}>
-                                    <div
-                                        style={{
-                                            width: "100%",
-                                            height: "350px",
-                                            backgroundColor: "#000",
-                                            display: "flex",
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                            overflow: "hidden",
-                                        }}
-                                    >
+                                    <div className="verification-image-container">
                                         <img
                                             src={URL.createObjectURL(file)}
-                                            alt={`Image ${index + 1}`}
-                                            style={{
-                                                width: "100%",
-                                                height: "100%",
-                                                objectFit: "cover",
-                                            }}
+                                            alt={`Verification image ${index + 1}`}
+                                            className="verification-image"
                                         />
                                     </div>
                                 </Carousel.Item>
@@ -156,16 +141,7 @@ const Verify: React.FC = () => {
                         <Button
                             variant="dark"
                             size="sm"
-                            style={{
-                                position: "absolute",
-                                top: 10,
-                                right: 10,
-                                zIndex: 10,
-                                borderRadius: "4px",
-                                fontSize: "110%",
-                                width: "30px",
-                                height: "30px",
-                            }}
+                            className="verification-delete-btn"
                             onClick={() => removeImage(activeIndex)}
                             title="Delete current image"
                         >
@@ -174,23 +150,25 @@ const Verify: React.FC = () => {
                     </div>
                 )}
 
-                {error && <Alert variant="danger" style={{ marginTop: "1rem" }}>{error}</Alert>}
-                {success && <Alert variant="success" style={{ marginTop: "1rem" }}>{success}</Alert>}
+                {error && (
+                    <Alert variant="danger" className="verification-alert">
+                        {error}
+                    </Alert>
+                )}
+                {success && (
+                    <Alert variant="success" className="verification-alert">
+                        {success}
+                    </Alert>
+                )}
             </Form>
-            <div
-                style={{
-                    display: "flex",
-                    justifyContent: "center"
-                }}
-            >
+
+            <div className="verification-submit-container">
                 <Button
-                    disabled={loading || images.length == 0}
-                    style={{
-                        marginTop: "12px"
-                    }}
+                    disabled={loading || images.length === 0}
+                    className="verification-submit-btn"
                     onClick={handleSubmit}
                 >
-                    {loading ? "Submitting..." : images.length == 0 ? "Attach at least one photo!" : "Submit Request"}
+                    {loading ? "Submitting..." : images.length === 0 ? "Attach at least one photo!" : "Submit Request"}
                 </Button>
             </div>
         </div>

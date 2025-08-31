@@ -2,22 +2,23 @@ import React, { useState, useEffect } from "react";
 import { Spinner } from "react-bootstrap";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
+import "./Profile.css";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 
-import PageWrapper from "../../components/PageWrapper";
+import PageWrapper from "../../components/PageWrapper/PageWrapper";
 
 import AvatarPlaceholder from "../../assets/icons/AvatarPlaceholder.svg?react";
 import DarkHexagon from "../../assets/icons/DarkHexagon.svg?react";
 import OrangeHexagon from "../../assets/icons/OrangeHexagon.svg?react";
 
-import CreateNotice from "../../components/tabs/CreateNotice";
-import MyNotices from "../../components/tabs/MyNotices";
-import Settings from "../../components/tabs/Settings";
-import Verify from "../../components/tabs/Verify";
-import ChatView from "../../components/tabs/ChatView";
-import AdminPanel from "../../components/tabs/AdminPanel";
-import Rating from "../../components/tabs/Rating";
+import CreateNotice from "../../components/CreateNoticeTab/CreateNotice";
+import MyNotices from "../../components/MyNoticesTab/MyNotices";
+import Settings from "../../components/SettingsTab/Settings";
+import Verify from "../../components/VerifyTab/Verify";
+import ChatView from "../../components/ChatViewTab/ChatView";
+import AdminPanel from "../../components/AdminPanel/AdminPanel";
+import Rating from "../../components/RatingTab/Rating";
 
 interface UserData {
     id: number;
@@ -116,129 +117,77 @@ const ProfilePage: React.FC = () => {
     if (!user) return null;
 
     return (
-        <PageWrapper>
-            <div
-                style={{
-                    display: "flex",
-                    width: "100%",
-                    padding: "0 104px"
-                }}
-            >
-                {user.avatarBase64 ? (
-                    <div
-                        style={{
-                            width: "180px",
-                            height: "180px",
-                            clipPath: "polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)",
-                            overflow: "hidden",
-                            border: "2px solid #ccc"
-                        }}
-                    >
-                        <img
-                            src={user.avatarBase64}
-                            alt="Avatar Preview"
-                            style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover"
-                            }}
-                        />
+        <div className="profile-container">
+            {/* Desktop Tabs - Hexagons */}
+            <div className="desktop-tabs">
+                <div className="profile-header">
+                    <div className="info-container">
+                        {user.avatarBase64 ? (
+                            <div className="avatar-container">
+                                <img
+                                    src={user.avatarBase64}
+                                    alt="Avatar Preview"
+                                    className="avatar-image"
+                                />
+                            </div>
+                        ) : (
+                            <AvatarPlaceholder width={180} height={180} className="avatar-placeholder" />
+                        )}
+                        <div className="user-info">
+                            <p className="user-name">{user.name} {user.surname}</p>
+                            <p className="user-email">{user.email}</p>
+                        </div>
                     </div>
-                ) : (
-                    <AvatarPlaceholder width={180} height={180} />
-                )}
-                <div
-                    style={{
-                        padding: "60px 12px"
-                    }}
-                >
-                    <p
-                        style={{
-                            color: "white",
-                            textTransform: "uppercase",
-                            fontSize: "120%"
-                        }}
-                    >{user.name} {user.surname}</p>
-                    <p
-                        style={{
-                            color: "#a6a6a6"
-                        }}
-                    >{user.email}</p>
                 </div>
-            </div>
-            <div
-                style={{
-                    display: "flex",
-                    width: "100%",
-                    padding: "0 30px",
-                    position: "relative",
-                    top: "-36px"
-                }}
-            >
                 {tabs.map(({ label, key }) => {
                     const isActive = activeTab === key;
                     return (
                         <div
                             key={key}
                             onClick={() => setActiveTab(key as "my notices" | "chat" | "settings" | "create notice" | "verify" | "admin panel" | "rating")}
-                            style={{
-                                display: "flex",
-                                flexDirection: "column",
-                                alignItems: "center",
-                                cursor: "pointer",
-                                width: "164px"
-                            }}
+                            className="desktop-tab-item"
                         >
                             {isActive ? (
-                                <OrangeHexagon
-                                    width={180}
-                                    height={180}
-                                />
+                                <OrangeHexagon width={180} height={180} className="hexagon" />
                             ) : (
-                                <DarkHexagon
-                                    width={180}
-                                    height={180}
-                                />
+                                <DarkHexagon width={180} height={180} className="hexagon" />
                             )}
-                            <p
-                                style={{
-                                    position: "relative",
-                                    top: "-100px",
-                                    fontWeight: isActive ? "bold" : "normal",
-                                    color: isActive ? "#000" : "#fff",
-                                    textAlign: "center",
-                                    width: "100%",
-                                    textTransform: "uppercase"
-                                }}
-                            >
+                            <p className={`desktop-tab-label ${isActive ? 'active' : ''}`}>
                                 {label}
                             </p>
                         </div>
                     );
                 })}
             </div>
-            {activeTab === "chat" &&
-                <ChatView />
-            }
-            {activeTab === "my notices" && (
-                <MyNotices />
-            )}
-            {activeTab === "create notice" && (
-                <CreateNotice />
-            )}
-            {activeTab === "settings" && (
-                <Settings />
-            )}
-            {activeTab === "verify" && (
-                <Verify />
-            )}
-            {activeTab === "admin panel" && (
-                <AdminPanel />
-            )}
-            {activeTab === "rating" && (
-                <Rating/>
-            )}
-        </PageWrapper>
+
+            {/* Mobile Tabs - Regular Buttons */}
+            <div className="mobile-tabs">
+                <div className="mobile-tabs-grid">
+                    {tabs.map(({ label, key }) => {
+                        const isActive = activeTab === key;
+                        return (
+                            <button
+                                key={key}
+                                onClick={() => setActiveTab(key as "my notices" | "chat" | "settings" | "create notice" | "verify" | "admin panel" | "rating")}
+                                className={`mobile-tab-button ${isActive ? 'active' : ''}`}
+                            >
+                                {label}
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+
+            <div className="tab-content">
+                {activeTab === "chat" && <ChatView />}
+                {activeTab === "my notices" && <MyNotices />}
+                {activeTab === "create notice" && <CreateNotice />}
+                {activeTab === "settings" && <Settings />}
+                {activeTab === "verify" && <Verify />}
+                {activeTab === "admin panel" && <AdminPanel />}
+                {activeTab === "rating" && <Rating />}
+            </div>
+        </div>
     );
 };
 

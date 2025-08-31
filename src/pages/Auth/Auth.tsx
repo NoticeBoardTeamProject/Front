@@ -8,8 +8,6 @@ import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFaceSadTear, faFaceLaugh } from "@fortawesome/free-solid-svg-icons";
 
-import PageWrapper from "../../components/PageWrapper";
-
 const AuthPage: React.FC = () => {
     const navigate = useNavigate();
 
@@ -109,96 +107,94 @@ const AuthPage: React.FC = () => {
     }, [message]);
 
     return (
-        <PageWrapper>
-            <Form onSubmit={handleSubmit} style={{ width: "300px" }}>
-                {!isLogin && (
-                    <>
-                        <Form.Group className='mb-3'>
-                            <Form.Control
-                                placeholder='Name'
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                required
-                            />
-                        </Form.Group>
-                        <Form.Group className='mb-3'>
-                            <Form.Control
-                                placeholder='Surname'
-                                value={surname}
-                                onChange={(e) => setSurname(e.target.value)}
-                                required
-                            />
-                        </Form.Group>
-                        <Form.Group className='mb-3'>
-                            <Form.Control
-                                placeholder='Phone'
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                required
-                            />
-                        </Form.Group>
-                    </>
-                )}
+        <Form onSubmit={handleSubmit} style={{ width: "300px", marginTop: "32px" }}>
+            {!isLogin && (
+                <>
+                    <Form.Group className='mb-3'>
+                        <Form.Control
+                            placeholder='Name'
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            required
+                        />
+                    </Form.Group>
+                    <Form.Group className='mb-3'>
+                        <Form.Control
+                            placeholder='Surname'
+                            value={surname}
+                            onChange={(e) => setSurname(e.target.value)}
+                            required
+                        />
+                    </Form.Group>
+                    <Form.Group className='mb-3'>
+                        <Form.Control
+                            placeholder='Phone'
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            required
+                        />
+                    </Form.Group>
+                </>
+            )}
 
-                <Form.Group className='mb-3'>
-                    <Form.Control
-                        type='email'
-                        placeholder='Email'
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                </Form.Group>
+            <Form.Group className='mb-3'>
+                <Form.Control
+                    type='email'
+                    placeholder='Email'
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                />
+            </Form.Group>
 
-                <Form.Group className='mb-3'>
-                    <Form.Control
-                        type='password'
-                        placeholder='Password'
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </Form.Group>
+            <Form.Group className='mb-3'>
+                <Form.Control
+                    type='password'
+                    placeholder='Password'
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                />
+            </Form.Group>
 
-                <Button className='w-100' variant='dark' type='submit'>
-                    {isLogin ? "Log in" : "Register"}
-                </Button>
+            <Button className='w-100' variant='dark' type='submit'>
+                {isLogin ? "Log in" : "Register"}
+            </Button>
 
-                {message && (
-                    <Alert
-                        style={{
-                            opacity: isFadingOut ? 0 : 1,
-                            maxHeight: isFadingOut ? 0 : "100px",
-                            padding: isFadingOut ? "0" : "8px",
-                            marginTop: isFadingOut ? "0" : "16px",
-                            marginBottom: 0,
-                            overflow: "hidden",
-                            textAlign: "center",
-                            transition: "opacity 1s, max-height 1s ease, padding 1s ease, margin 1.5s ease",
-                            backgroundColor: message.variant === "success" ? "rgb(40, 167, 69)" : "rgb(220, 53, 69)",
-                            color: "white",
-                            border: "1px solid rgb(33, 37, 41)",
-                        }}
-                    >
-                        {message.icon && <FontAwesomeIcon icon={message.icon} style={{ marginRight: 6 }} />}
-                        {message.text}
-                    </Alert>
-                )}
+            {message && (
+                <Alert
+                    style={{
+                        opacity: isFadingOut ? 0 : 1,
+                        maxHeight: isFadingOut ? 0 : "100px",
+                        padding: isFadingOut ? "0" : "8px",
+                        marginTop: isFadingOut ? "0" : "16px",
+                        marginBottom: 0,
+                        overflow: "hidden",
+                        textAlign: "center",
+                        transition: "opacity 1s, max-height 1s ease, padding 1s ease, margin 1.5s ease",
+                        backgroundColor: message.variant === "success" ? "rgb(40, 167, 69)" : "rgb(220, 53, 69)",
+                        color: "white",
+                        border: "1px solid rgb(33, 37, 41)",
+                    }}
+                >
+                    {message.icon && <FontAwesomeIcon icon={message.icon} style={{ marginRight: 6 }} />}
+                    {message.text}
+                </Alert>
+            )}
 
-                <p style={{ color: "grey", textAlign: "center", marginTop: "12px" }}>
-                    {isLogin ? "Don't have an account? " : "Already have an account? "}
-                    <span
-                        style={{
-                            color: "#D9A441",
-                            cursor: "pointer",
-                        }}
-                        onClick={() => setIsLogin(!isLogin)}
-                    >
-                        {isLogin ? "Register!" : "Log in!"}
-                    </span>
-                </p>
-            </Form>
-        </PageWrapper>
+            <p style={{ color: "grey", textAlign: "center", marginTop: "12px" }}>
+                {isLogin ? "Don't have an account? " : "Already have an account? "}
+                <span
+                    style={{
+                        color: "#D9A441",
+                        cursor: "pointer",
+                    }}
+                    onClick={() => setIsLogin(!isLogin)}
+                >
+                    {isLogin ? "Register!" : "Log in!"}
+                </span>
+            </p>
+        </Form>
     );
 };
 
