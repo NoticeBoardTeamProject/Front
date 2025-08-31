@@ -242,7 +242,7 @@ const Main: React.FC = () => {
 
                 <div className="main-page-price-form">
                     <Form.Group controlId="minPriceInput" className="form-group price-group">
-                        <Form.Label>Price</Form.Label>
+                        <Form.Label>Price1</Form.Label>
                         <Form.Control
                             type="number"
                             value={minPrice}
