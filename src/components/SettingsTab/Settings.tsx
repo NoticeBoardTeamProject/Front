@@ -13,6 +13,7 @@ const Settings: React.FC = () => {
     const [editedSurname, setEditedSurname] = useState("");
     const [editedPhone, setEditedPhone] = useState("");
     const [editedAvatar, setEditedAvatar] = useState("");
+    const [email, setEmail] = useState(""); // збережемо email для reset
     const API_URL = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
@@ -34,12 +35,13 @@ const Settings: React.FC = () => {
             setEditedName(userData.name);
             setEditedSurname(userData.surname);
             setEditedPhone(userData.phone);
+            setEmail(userData.email); // <-- збережемо email
         };
 
         fetchUser();
     }, []);
 
-    const handleLogout = async (e: React.FormEvent) => {
+    const handleLogout = (e: React.FormEvent) => {
         e.preventDefault();
 
         localStorage.removeItem("token");
@@ -75,6 +77,17 @@ const Settings: React.FC = () => {
             console.error("Failed to update profile", err);
         }
     };
+
+    const handlePasswordReset = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            await axios.post(`${API_URL}/forgot-password`, { email });
+            alert("If this email exists, instructions have been sent.");
+        } catch (err) {
+            console.error("Failed to request password reset", err);
+            alert("Failed to request password reset.");
+        }
+    }
 
     return (
         <div className="settings-container">
@@ -154,10 +167,12 @@ const Settings: React.FC = () => {
                 <Button variant='secondary' onClick={handleUpdate} className="save-button">
                     Save changes
                 </Button>
+                <Button variant='warning' onClick={handlePasswordReset} className="reset-button">
+                    Reset password
+                </Button>
             </div>
         </div>
     );
 };
 
 export default Settings;
-

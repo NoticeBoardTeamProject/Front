@@ -227,7 +227,11 @@ const AuthPage: React.FC = () => {
 
             {isLogin && !isForgotPassword && (
                 <p
-                    style={{ color: "#D9A441", textAlign: "center", cursor: "pointer" }}
+                    style={{ 
+                        color: "#D9A441", 
+                        textAlign: "center", 
+                        cursor: "pointer" 
+                    }}
                     onClick={() => setIsForgotPassword(true)}
                 >
                     Forgot password?
@@ -236,7 +240,12 @@ const AuthPage: React.FC = () => {
 
             {isForgotPassword && (
                 <p
-                    style={{ color: "#D9A441", textAlign: "center", cursor: "pointer" }}
+                    style={{ 
+                        color: "#D9A441", 
+                        textAlign: "center", 
+                        cursor: "pointer",
+                        marginTop: "12px"
+                    }}
                     onClick={() => setIsForgotPassword(false)}
                 >
                     Back to login

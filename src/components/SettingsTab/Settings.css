@@ -104,7 +104,8 @@
 }
 
 .logout-button,
-.save-button {
+.save-button,
+.reset-button {
     min-width: 140px;
     padding: 10px 40px;
     border-radius: 6px;
@@ -179,7 +180,9 @@
     }
 
     .logout-button,
-    .save-button {
+    .save-button,
+    .reset-button {
+        padding: 10px 4px;
         width: 100%;
         max-width: 280px;
         min-width: auto;
@@ -202,8 +205,9 @@
     }
 
     .logout-button,
-    .save-button {
-        padding: 8px 16px;
+    .save-button,
+    .reset-button {
+        padding: 10px 4px;
         font-size: 14px;
     }
 }
@@ -225,7 +229,8 @@
 .settings-input:focus,
 .avatar-file-input:focus,
 .logout-button:focus,
-.save-button:focus {
+.save-button:focus,
+.reset-button:focus {
     outline: 2px solid #D9A441;
     outline-offset: 2px;
 }
