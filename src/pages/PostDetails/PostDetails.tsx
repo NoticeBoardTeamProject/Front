@@ -37,6 +37,7 @@ interface Post {
     createdAt: string;
     userId: number;
     category_id: number;
+    category_name: string;
     isUsed: boolean;
     currency: string;
     location: string;
@@ -156,6 +157,8 @@ const PostDetails: React.FC = () => {
         setReportError(null);
         setReportSuccess(null);
         setShowReportModal(true);
+
+        console.log(role);
     };
 
     const closeReportModal = () => {
@@ -393,6 +396,7 @@ const PostDetails: React.FC = () => {
                         )}
 
                         <div className="post-details-info">
+
                             <div className="post-details-meta">
                                 <p>{post.location} - {formatDate(post.createdAt)}</p>
                                 <div>Views: {post.views}</div>
@@ -400,12 +404,13 @@ const PostDetails: React.FC = () => {
 
                             <div className="post-details-main">
                                 <h1 className="post-details-title">{post.title}</h1>
-                                <p className="post-details-caption">{post.caption}</p>
 
                                 <p className="post-details-price">
                                     {post.price.toLocaleString("de-DE")}{post.currency == "UAH" ? "₴" : post.currency == "USD" ? "$" : "€"}
                                 </p>
                             </div>
+
+                            <p className="post-details-caption">{post.caption}</p>
 
                             <div className="post-details-seller">
                                 <div className="post-details-seller-info">

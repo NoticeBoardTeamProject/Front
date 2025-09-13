@@ -3,8 +3,7 @@ import { Form, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Settings.css"
-
-import "bootstrap/dist/css/bootstrap.min.css";
+import Favorite from "../../assets/icons/Favorite.svg?react";
 
 const Settings: React.FC = () => {
     const navigate = useNavigate();
@@ -89,6 +88,61 @@ const Settings: React.FC = () => {
         }
     }
 
+    const [allCategories, setAllCategories] = useState<{ id: number; name: string }[]>([]);
+    const [favoriteCategories, setFavoriteCategories] = useState<number[]>([]);
+    const [updatingFavorite, setUpdatingFavorite] = useState(false);
+
+    // Завантаження всіх категорій та улюблених при монтуванні
+    useEffect(() => {
+        const fetchCategories = async () => {
+            const token = localStorage.getItem("token");
+            if (!token) return;
+
+            try {
+                const [allRes, favRes] = await Promise.all([
+                    axios.get(`${API_URL}/categories`),
+                    axios.get(`${API_URL}/categories/favorite`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }),
+                ]);
+
+                setAllCategories(allRes.data);
+                setFavoriteCategories(favRes.data.map((c: any) => c.id));
+            } catch (err) {
+                console.error("Failed to fetch categories", err);
+            }
+        };
+
+        fetchCategories();
+    }, []);
+
+    const toggleFavoriteCategory = async (categoryId: number) => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        setUpdatingFavorite(true);
+        try {
+            if (favoriteCategories.includes(categoryId)) {
+                await axios.delete(`${API_URL}/categories/favorite/${categoryId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                setFavoriteCategories(prev => prev.filter(id => id !== categoryId));
+            } else {
+                await axios.post(`${API_URL}/categories/favorite/${categoryId}`, {}, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                setFavoriteCategories(prev => [...prev, categoryId]);
+            }
+
+            console.log('sending one');
+        } catch (err) {
+            console.error("Failed to update favorite", err);
+        } finally {
+            setUpdatingFavorite(false);
+        }
+    };
+
+
     return (
         <div className="settings-container">
             <div className="settings-section">
@@ -158,6 +212,25 @@ const Settings: React.FC = () => {
                         </div>
                     </div>
                 )}
+            </div>
+
+            <div className="favorite-categories-section">
+                <p className="field-label">Favorite Categories</p>
+                <div className="favorite-categories-list">
+                    {allCategories.map(cat => (
+                        <div key={cat.id} className="favorite-category-item">
+                            <span className="favorite-category-name">{cat.name}</span>
+                            <button
+                                className={`favorite-category-btn ${favoriteCategories.includes(cat.id) ? "favorited" : ""
+                                    }`}
+                                onClick={() => toggleFavoriteCategory(cat.id)}
+                                disabled={updatingFavorite}
+                            >
+                                <Favorite width={16} height={16} />
+                            </button>
+                        </div>
+                    ))}
+                </div>
             </div>
 
             <div className="settings-actions">

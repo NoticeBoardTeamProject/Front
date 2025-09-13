@@ -234,3 +234,66 @@
     outline: 2px solid #D9A441;
     outline-offset: 2px;
 }
+
+.favorite-categories-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 28px 20px;
+    background-color: #0D0D0D;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.favorite-categories-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.favorite-category-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #1a1a1a;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #333;
+    min-width: 140px;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+.favorite-category-name {
+    color: #F2F2F2;
+    font-weight: 500;
+    margin-right: 6px;
+}
+
+.favorite-category-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    border: none;
+    background: linear-gradient(to bottom, #D9A441 0%, #c6a974 50%, #cc8d18 100%);
+    color: #0D0D0D;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.2s ease;
+}
+
+.favorite-category-btn.favorited {
+    background: #2e2e2e;
+    color: #D9A441;
+}
+
+.favorite-category-btn:hover {
+    opacity: 0.85;
+}
+
+.favorite-category-btn:active {
+    transform: translateY(1px);
+}
