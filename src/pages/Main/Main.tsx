@@ -287,7 +287,7 @@ const Main: React.FC = () => {
             </p>
 
             <div className="notices-header">
-                <p className="notices-title">Notices</p>
+                <p className="notices-title">Notices1</p>
                 <div className="tabs-container">
                     <div className="tabs">
                         {["All", "Popular", "New", "Cheapest", "Expensive"].map((tab) => (
